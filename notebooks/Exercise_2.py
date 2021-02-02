@@ -14,7 +14,7 @@ counted_seq = OrderedDict(sorted(dict.items(Counter(combined_seq))))
 aminoacid_key_list = list(counted_seq.keys())
 count_list = list(counted_seq.values())
 
-with open("../human.csv", "w") as output:
+with open("../Results_Ex_2/human.csv", "w") as output:
     aap_writer = csv.DictWriter(output, fieldnames=["aa", "count"], delimiter=",", quotechar=" ", quoting=csv.QUOTE_ALL)
     aap_writer.writeheader()
     for pos, element in enumerate(aminoacid_key_list):
@@ -33,7 +33,7 @@ aminoacid_key_list = list(counted_seq.keys())
 count_list = list(counted_seq.values())
 
 
-with open("../bacillus.csv", "w") as output:
+with open("../Results_Ex_2/bacillus.csv", "w") as output:
     aap_writer = csv.DictWriter(output, fieldnames=["aa", "count"], extrasaction='ignore')
     aap_writer.writeheader()
     for pos, element in enumerate(aminoacid_key_list):
@@ -51,7 +51,7 @@ counted_seq = OrderedDict(sorted(dict.items(Counter(combined_seq))))
 aminoacid_key_list = list(counted_seq.keys())
 count_list = list(counted_seq.values())
 
-with open("../archaea.csv", "w") as output:
+with open("../Results_Ex_2/archaea.csv", "w") as output:
     aap_writer = csv.DictWriter(output, fieldnames=["aa", "count"], extrasaction='ignore')
     aap_writer.writeheader()
     for pos, element in enumerate(aminoacid_key_list):
@@ -69,7 +69,7 @@ counted_seq = OrderedDict(sorted(dict.items(Counter(combined_seq))))
 aminoacid_key_list = list(counted_seq.keys())
 count_list = list(counted_seq.values())
 
-with open("../eggplant.csv", "w") as output:
+with open("../Results_Ex_2/eggplant.csv", "w") as output:
     aap_writer = csv.DictWriter(output, fieldnames=["aa", "count"], extrasaction='ignore')
     aap_writer.writeheader()
     for pos, element in enumerate(aminoacid_key_list):
@@ -88,7 +88,7 @@ counted_seq = OrderedDict(sorted(dict.items(Counter(combined_seq))))
 aminoacid_key_list = list(counted_seq.keys())
 count_list = list(counted_seq.values())
 
-with open("../lion.csv", "w") as output:
+with open("../Results_Ex_2/lion.csv", "w") as output:
     aap_writer = csv.DictWriter(output, fieldnames=["aa", "count"], extrasaction='ignore')
     aap_writer.writeheader()
     for pos, element in enumerate(aminoacid_key_list):

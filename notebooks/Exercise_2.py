@@ -14,8 +14,8 @@ print(counted_seq)
 aminoacid_key_list = list(counted_seq.keys())
 count_list = list(counted_seq.values())
 
-print(aminoacid_key_list)
-print(count_list)
+print("human", aminoacid_key_list)
+print("human", count_list)
 
 with open("../human.csv", "w") as output:
     aap_writer = csv.DictWriter(output, fieldnames=["aa", "count"], extrasaction='ignore')
@@ -36,8 +36,8 @@ print(counted_seq)
 aminoacid_key_list = list(counted_seq.keys())
 count_list = list(counted_seq.values())
 
-print(aminoacid_key_list)
-print(count_list)
+print("bacillus", aminoacid_key_list)
+print("bacillus", count_list)
 
 with open("../bacillus.csv", "w") as output:
     aap_writer = csv.DictWriter(output, fieldnames=["aa", "count"], extrasaction='ignore')

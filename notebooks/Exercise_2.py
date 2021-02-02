@@ -54,6 +54,12 @@ with open(data) as aap:
             combined_seq += line_dict.replace("\n", "")
 counted_seq = dict(Counter(combined_seq))
 
+aminoacid_key_list = list(counted_seq.keys())
+count_list = list(counted_seq.values())
+
+print("archaea", aminoacid_key_list)
+print("archaea", count_list)
+
 with open("../archaea.csv", "w") as output:
     aap_writer = csv.DictWriter(output, fieldnames=["aa", "count"], extrasaction='ignore')
     aap_writer.writeheader()
@@ -68,6 +74,12 @@ with open(data) as aap:
         if not line_dict.startswith(">"):
             combined_seq += line_dict.replace("\n", "")
 counted_seq = dict(Counter(combined_seq))
+
+aminoacid_key_list = list(counted_seq.keys())
+count_list = list(counted_seq.values())
+
+print("eggplant", aminoacid_key_list)
+print("eggplant", count_list)
 
 with open("../eggplant.csv", "w") as output:
     aap_writer = csv.DictWriter(output, fieldnames=["aa", "count"], extrasaction='ignore')
@@ -84,6 +96,12 @@ with open(data) as aap:
         if not line_dict.startswith(">"):
             combined_seq += line_dict.replace("\n", "")
 counted_seq = dict(Counter(combined_seq))
+
+aminoacid_key_list = list(counted_seq.keys())
+count_list = list(counted_seq.values())
+
+print("lion", aminoacid_key_list)
+print("lion", count_list)
 
 with open("../lion.csv", "w") as output:
     aap_writer = csv.DictWriter(output, fieldnames=["aa", "count"], extrasaction='ignore')

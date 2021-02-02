@@ -1,5 +1,5 @@
 import csv
-from collections import Counter
+from collections import Counter, OrderedDict
 
 #human
 data = "../uniprot-filtered-organism__Homo+sapiens+(Human)+[9606]_+AND+review--.fasta"
@@ -8,7 +8,8 @@ with open(data) as aap:
     for line_dict in aap:
         if not line_dict.startswith(">"):
             combined_seq += line_dict.replace("\n", "")
-counted_seq = dict(Counter(combined_seq))
+# counted_seq = dict(Counter(combined_seq))
+counted_seq = OrderedDict(sorted(dict.items(Counter(combined_seq))))
 print(counted_seq)
 
 aminoacid_key_list = list(counted_seq.keys())
@@ -18,10 +19,10 @@ print("human", aminoacid_key_list)
 print("human", count_list)
 
 with open("../human.csv", "w") as output:
-    aap_writer = csv.DictWriter(output, fieldnames=["aa", "count"], extrasaction='ignore')
+    aap_writer = csv.DictWriter(output, fieldnames=["aa", "count"])
     aap_writer.writeheader()
     for pos, element in enumerate(aminoacid_key_list):
-        aap_writer.writerow({"aa": aminoacid_key_list[pos], " count": count_list[pos]})
+        aap_writer.writerow({"aa": aminoacid_key_list[pos], "count": count_list[pos]})
 
 # bacillus subtilis
 data = "../uniprot_bacillus_subtilis.fasta"
@@ -30,7 +31,7 @@ with open(data) as aap:
     for line_dict in aap:
         if not line_dict.startswith(">"):
             combined_seq += line_dict.replace("\n", "")
-counted_seq = dict(Counter(combined_seq))
+counted_seq = OrderedDict(sorted(dict.items(Counter(combined_seq))))
 print(counted_seq)
 
 aminoacid_key_list = list(counted_seq.keys())
@@ -43,7 +44,7 @@ with open("../bacillus.csv", "w") as output:
     aap_writer = csv.DictWriter(output, fieldnames=["aa", "count"], extrasaction='ignore')
     aap_writer.writeheader()
     for pos, element in enumerate(aminoacid_key_list):
-        aap_writer.writerow({"aa": aminoacid_key_list[pos], " count": count_list[pos]})
+        aap_writer.writerow({"aa": aminoacid_key_list[pos], "count": count_list[pos]})
 
 # archea
 data = "../uniprot_Haloquadratum_walsbyi.fasta"
@@ -52,7 +53,7 @@ with open(data) as aap:
     for line_dict in aap:
         if not line_dict.startswith(">"):
             combined_seq += line_dict.replace("\n", "")
-counted_seq = dict(Counter(combined_seq))
+counted_seq = OrderedDict(sorted(dict.items(Counter(combined_seq))))
 
 aminoacid_key_list = list(counted_seq.keys())
 count_list = list(counted_seq.values())
@@ -64,7 +65,7 @@ with open("../archaea.csv", "w") as output:
     aap_writer = csv.DictWriter(output, fieldnames=["aa", "count"], extrasaction='ignore')
     aap_writer.writeheader()
     for pos, element in enumerate(aminoacid_key_list):
-        aap_writer.writerow({"aa": aminoacid_key_list[pos], " count": count_list[pos]})
+        aap_writer.writerow({"aa": aminoacid_key_list[pos], "count": count_list[pos]})
 
 # plantae (eggplant)
 data = "../uniprot_Solanum_melongena_Eggplant.fasta"
@@ -73,7 +74,7 @@ with open(data) as aap:
     for line_dict in aap:
         if not line_dict.startswith(">"):
             combined_seq += line_dict.replace("\n", "")
-counted_seq = dict(Counter(combined_seq))
+counted_seq = OrderedDict(sorted(dict.items(Counter(combined_seq))))
 
 aminoacid_key_list = list(counted_seq.keys())
 count_list = list(counted_seq.values())
@@ -85,7 +86,7 @@ with open("../eggplant.csv", "w") as output:
     aap_writer = csv.DictWriter(output, fieldnames=["aa", "count"], extrasaction='ignore')
     aap_writer.writeheader()
     for pos, element in enumerate(aminoacid_key_list):
-        aap_writer.writerow({"aa": aminoacid_key_list[pos], " count": count_list[pos]})
+        aap_writer.writerow({"aa": aminoacid_key_list[pos], "count": count_list[pos]})
 
 
 # animalia (lion)
@@ -95,7 +96,7 @@ with open(data) as aap:
     for line_dict in aap:
         if not line_dict.startswith(">"):
             combined_seq += line_dict.replace("\n", "")
-counted_seq = dict(Counter(combined_seq))
+counted_seq = OrderedDict(sorted(dict.items(Counter(combined_seq))))
 
 aminoacid_key_list = list(counted_seq.keys())
 count_list = list(counted_seq.values())
@@ -107,4 +108,4 @@ with open("../lion.csv", "w") as output:
     aap_writer = csv.DictWriter(output, fieldnames=["aa", "count"], extrasaction='ignore')
     aap_writer.writeheader()
     for pos, element in enumerate(aminoacid_key_list):
-        aap_writer.writerow({"aa": aminoacid_key_list[pos], " count": count_list[pos]})
+        aap_writer.writerow({"aa": aminoacid_key_list[pos], "count": count_list[pos]})

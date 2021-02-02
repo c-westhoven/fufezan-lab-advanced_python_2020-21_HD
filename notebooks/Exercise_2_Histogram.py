@@ -20,7 +20,7 @@ plt.ylabel("counts")
 plt. title("human")
 plt.bar(list(counted_seq.keys()), list(counted_seq.values()))
 plt.show()
-plt.savefig("Human.pdf")
+plt.savefig("Human_Westhoven.pdf")
 
 # bacteria (B. subtilis)
 data = "../uniprot_bacillus_subtilis.fasta"
@@ -36,7 +36,7 @@ plt.ylabel("counts")
 plt. title("B. subtilis")
 plt.bar(list(counted_seq.keys()), list(counted_seq.values()))
 plt.show()
-plt.savefig("B_Subtilis.pdf")
+plt.savefig("B_Subtilis_Westhoven.pdf")
 
 # archea
 data = "../uniprot_Haloquadratum_walsbyi.fasta"
@@ -52,7 +52,7 @@ plt.ylabel("counts")
 plt. title("Archaea")
 plt.bar(list(counted_seq.keys()), list(counted_seq.values()))
 plt.show()
-plt.savefig("Archaea.pdf")
+plt.savefig("Archaea_Westhoven.pdf")
 
 # plantae (eggplant)
 data = "../uniprot_Solanum_melongena_Eggplant.fasta"
@@ -68,7 +68,7 @@ plt.ylabel("counts")
 plt. title("Eggplant")
 plt.bar(list(counted_seq.keys()), list(counted_seq.values()))
 plt.show()
-plt.savefig("Eggplant.pdf")
+plt.savefig("Eggplant_Westhoven.pdf")
 
 # animalia (lion)
 data = "../uniprot_Panthera_leo_Lion.fasta"
@@ -84,4 +84,4 @@ plt.ylabel("counts")
 plt. title("Lion")
 plt.bar(list(counted_seq.keys()), list(counted_seq.values()))
 plt.show()
-plt.savefig("Lion.pdf")
+plt.savefig("Lion_Westhoven.pdf")

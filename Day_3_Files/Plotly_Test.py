@@ -5,17 +5,7 @@ import pandas as pd
 # aa_df = pd.read_csv("../data/amino_acid_properties.csv")
 # print(type(aa_df))
 #
-# data = [
-#     go.Bar(
-#         x=aa_df["1-letter code"],
-#         y=aa_df.pka1
-#     )
-# ]
-#
-# fig = go.Figure(data=data)
-# fig.show()
 
-# kwarg == keyword argument
 
 
 def sequence_from_fasta(fastafile):
@@ -50,11 +40,25 @@ def hydropathy_sequence_list(sequence, mapping_dict):
     return sequence_as_hydropathy
 
 
+def plot_sequence(sequence_aa, sequence_hydropathy):
+    sequence_aa_list=[]
+    for pos, aminoacid in enumerate(sequence_aa):
+        sequence_aa_list.append(aminoacid)
+    data = [
+        go.Bar(
+            x=sequence_aa_list,
+            y=sequence_hydropathy
+        )
+    ]
+    fig = go.Figure(data=data)
+    fig.show()
+    return
+
+
 if __name__ == '__main__':
-    # aa_df = pd.read_csv("../data/amino_acid_properties.csv")
     sequence = sequence_from_fasta("./P32249.fasta")
     mapping_dict = mapping_dict("../data/amino_acid_properties.csv")
-    list = hydropathy_sequence_list(sequence, mapping_dict)
-    print(list)
+    sequence_hydropathy = hydropathy_sequence_list(sequence, mapping_dict)
+    plot_sequence(sequence, sequence_hydropathy)
 
 

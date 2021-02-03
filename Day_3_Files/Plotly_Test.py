@@ -2,11 +2,6 @@ import plotly
 import plotly.graph_objects as go
 import pandas as pd
 
-# aa_df = pd.read_csv("../data/amino_acid_properties.csv")
-# print(type(aa_df))
-#
-
-
 
 def sequence_from_fasta(fastafile):
     with open(fastafile) as fasta:
@@ -40,7 +35,7 @@ def hydropathy_sequence_list(sequence, mapping_dict):
     return sequence_as_hydropathy
 
 
-def plot_sequence(sequence_aa, sequence_hydropathy):
+def plot_sequence_bar(sequence_aa, sequence_hydropathy):
     sequence_aa_list=[]
     for pos, aminoacid in enumerate(sequence_aa):
         sequence_aa_list.append(aminoacid + str(pos))
@@ -51,14 +46,48 @@ def plot_sequence(sequence_aa, sequence_hydropathy):
         )
     ]
     fig = go.Figure(data=data)
+    fig.update_layout(title_text='Hydropathy Along G Protein Sequence',
+                      xaxis=dict(
+                          title='G Protein Sequence'
+                      ),
+                      yaxis=dict(
+                          title='Hydropathy'
+                      ))
     fig.show()
     return
 
+
+def plot_sequence_bubble(sequence_aa, sequence_hydropathy):
+    sequence_aa_list=[]
+    for pos, aminoacid in enumerate(sequence_aa):
+        sequence_aa_list.append(aminoacid + str(pos))
+
+    pos_hydropathy = []
+    for element in sequence_hydropathy:
+        pos_hydropathy.append(10 * abs(element))
+    data = [
+        go.Scatter(
+            x=sequence_aa_list,
+            y=sequence_hydropathy,
+            mode='markers',
+            marker_size=pos_hydropathy
+        )
+    ]
+    fig = go.Figure(data=data)
+    fig.update_layout(title_text='Hydropathy Along G Protein Sequence',
+                      xaxis=dict(
+                          title='G Protein Sequence'
+                      ),
+                      yaxis=dict(
+                          title='Hydropathy'
+                      ))
+    fig.show()
+    return
 
 if __name__ == '__main__':
     sequence = sequence_from_fasta("./P32249.fasta")
     mapping_dict = mapping_dict("../data/amino_acid_properties.csv")
     sequence_hydropathy = hydropathy_sequence_list(sequence, mapping_dict)
-    plot_sequence(sequence, sequence_hydropathy)
+    plot_sequence_bubble(sequence, sequence_hydropathy)
 
 

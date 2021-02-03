@@ -97,11 +97,32 @@ def sliding_window_hydropathy(sequence, mapping_dict, length):
     return averaged_hydropathy_list
 
 
+def plot_sequence_bar_window(len_window_list, sequence_hydropathy):
+    sequence_aa_list=[]
+    for x in range(len_window_list):
+        sequence_aa_list.append(x)
+    data = [
+        go.Bar(
+            x=sequence_aa_list,
+            y=sequence_hydropathy
+        )
+    ]
+    fig = go.Figure(data=data)
+    fig.update_layout(title_text='Hydropathy Along G Protein Sequence',
+                      xaxis=dict(
+                          title='G Protein Sequence'
+                      ),
+                      yaxis=dict(
+                          title='Hydropathy'
+                      ))
+    fig.show()
+    return
+
+
 if __name__ == '__main__':
     sequence = sequence_from_fasta("./P32249.fasta")
     mapping_dict = mapping_dict("../data/amino_acid_properties.csv")
     sequence_hydropathy = hydropathy_sequence_list(sequence, mapping_dict)
     # plot_sequence_bubble(sequence, sequence_hydropathy)
     window = sliding_window_hydropathy(sequence, mapping_dict, 10)
-    print(window)
-    plot_sequence_bar()
+    plot_sequence_bar_window(len(window), window)

@@ -43,7 +43,7 @@ def hydropathy_sequence_list(sequence, mapping_dict):
 def plot_sequence(sequence_aa, sequence_hydropathy):
     sequence_aa_list=[]
     for pos, aminoacid in enumerate(sequence_aa):
-        sequence_aa_list.append(aminoacid)
+        sequence_aa_list.append(aminoacid + str(pos))
     data = [
         go.Bar(
             x=sequence_aa_list,

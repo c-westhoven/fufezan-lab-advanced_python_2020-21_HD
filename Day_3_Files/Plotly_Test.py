@@ -160,7 +160,25 @@ if __name__ == '__main__':
 
     parser =argparse.ArgumentParser()
     parser.add_argument("--fasta_file", help="FASTA file with the sequence to be analyzed. ", type=str)
+    parser.add_argument("--properties", help="csv file with amino acid properties. ", type=str)
     args = parser.parse_args()
     fasta_file_string = args.fasta_file
+    aap = args.properties
 
-    sequence_from_fasta=sequence_from_fasta(fasta_file_string)
+    seq = sequence_from_fasta(fasta_file_string)
+    mapping_dict = mapping_dict(aap)
+
+    sequence_hydropathy = hydropathy_sequence_list(seq, mapping_dict)
+    plot_bar(seq_hydropathy=sequence_hydropathy, seq_aa=seq, title="Hydropathy Along G Protein Sequence",
+             xaxis="G Protein Sequence", yaxis="Hydropathy")
+    window = sliding_window_hydropathy(seq, mapping_dict, 15)
+    plot_bar(seq_hydropathy=window)
+    plot_bubble(seq_hydropathy=sequence_hydropathy, seq_aa=seq, title="Hydropathy")
+
+    seq.close()         # look up why
+    aap.close()
+
+# possible command line input
+# python Day_3_Files/Plotly_Test.py --fasta_file "./Day_3_Files./P32249.fasta" --properties "../data/amino_acid_properties.csv"
+
+

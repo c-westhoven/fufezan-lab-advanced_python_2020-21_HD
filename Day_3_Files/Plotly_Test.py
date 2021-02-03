@@ -1,10 +1,14 @@
-import plotly
 import plotly.graph_objects as go
 import pandas as pd
 from collections import deque
-
+import argparse
 
 def sequence_from_fasta(fastafile):
+    """
+    gathering sequences from fasta file
+    :param fastafile: fasta file "./name.fasta"
+    :return:
+    """
     with open(fastafile) as fasta:
         combined_seq = ""
         for line_dict in fasta:
@@ -14,6 +18,11 @@ def sequence_from_fasta(fastafile):
 
 
 def mapping_dict(amino_acid_properties_csv):
+    """
+    create a mapping dictionary from csv
+    :param amino_acid_properties_csv: "../folder/name.csv"
+    :return: mapping_dict
+    """
     aa_df = pd.read_csv(amino_acid_properties_csv)
     hydropathy_df = pd.DataFrame.drop(aa_df, columns=["Name", "3-letter code", "Molecular Weight",
                                                       "Molecular Formula", "Residue Formula", "Residue Weight", "pka1",
@@ -26,9 +35,9 @@ def mapping_dict(amino_acid_properties_csv):
 
 def hydropathy_sequence_list(sequence, mapping_dict):
     """
-
-    :param sequence:
-    :param mapping_dict:
+    creates a list with hydropathy values corresponding to the sequence
+    :param sequence: single sequence, str
+    :param mapping_dict: mapping_dict with aminoacid: hydropathy
     :return:
     """
     sequence_as_hydropathy = []
@@ -37,40 +46,35 @@ def hydropathy_sequence_list(sequence, mapping_dict):
     return sequence_as_hydropathy
 
 
-def plot_sequence_bar(sequence_aa, sequence_hydropathy, title="", xaxis="", yaxis=""):
-    sequence_aa_list = []
-    for pos, aminoacid in enumerate(sequence_aa):
-        sequence_aa_list.append(aminoacid + str(pos))
-    data = [
-        go.Bar(
-            x=sequence_aa_list,
-            y=sequence_hydropathy
-        )
-    ]
-    fig = go.Figure(data=data)
-    fig.update_layout(title_text=title,
-                      xaxis=dict(
-                          title=xaxis
-                      ),
-                      yaxis=dict(
-                          title=yaxis
-                      ))
-    fig.show()
-    return
-
-
-def plot_sequence_bubble(sequence_aa, sequence_hydropathy, title="", xaxis="", yaxis=""):
-    sequence_aa_list = []
-    for pos, aminoacid in enumerate(sequence_aa):
-        sequence_aa_list.append(aminoacid + str(pos))
+def plot_bubble(seq_hydropathy, seq_aa=None, title="", xaxis="", yaxis=""):
+    """
+    plots the sequence (x) against the corresponding values (ex. hydropathy) (y)
+    :param seq_hydropathy: list with hydropathy values corresponding to amino acid sequence
+    :param seq_aa: generally a string
+    :param title: title of plot
+    :param xaxis: xaxis label
+    :param yaxis: yaxis label
+    :return:
+    """
+    if isinstance(seq_aa, str) == True:
+        sequence_aa_list = []
+        for pos, aminoacid in enumerate(seq_aa):
+            sequence_aa_list.append(aminoacid + str(pos))
+    elif seq_aa is None:
+        sequence_aa_list = []
+        for x in range(len(seq_hydropathy)):
+            sequence_aa_list.append(x)
+    else:
+        sequence_aa_list = seq_aa
 
     pos_hydropathy = []
-    for element in sequence_hydropathy:
+    for element in seq_hydropathy:
         pos_hydropathy.append(10 * abs(element))
+
     data = [
         go.Scatter(
             x=sequence_aa_list,
-            y=sequence_hydropathy,
+            y=seq_hydropathy,
             mode='markers',
             marker_size=pos_hydropathy
         )
@@ -88,6 +92,13 @@ def plot_sequence_bubble(sequence_aa, sequence_hydropathy, title="", xaxis="", y
 
 
 def sliding_window_hydropathy(sequence, mapping_dict, length):
+    """
+    creates a sliding window along sequence, and calculates the average at each position
+    :param sequence: aminoacid sequence, str
+    :param mapping_dict: mapping dict
+    :param length: length of window
+    :return: list where each element represents the average of the window at a position
+    """
     sequence_as_hydropathy_window = deque([], maxlen=length)
     averaged_hydropathy_list = []
     for pos, aa in enumerate(sequence):
@@ -99,29 +110,16 @@ def sliding_window_hydropathy(sequence, mapping_dict, length):
     return averaged_hydropathy_list
 
 
-def plot_sequence_bar_window(len_window_list, sequence_hydropathy):
-    sequence_aa_list = []
-    for x in range(len_window_list):
-        sequence_aa_list.append(x)
-    data = [
-        go.Bar(
-            x=sequence_aa_list,
-            y=sequence_hydropathy
-        )
-    ]
-    fig = go.Figure(data=data)
-    fig.update_layout(title_text='Hydropathy Along G Protein Sequence',
-                      xaxis=dict(
-                          title='G Protein Sequence'
-                      ),
-                      yaxis=dict(
-                          title='Hydropathy'
-                      ))
-    fig.show()
-    return
-
-
-def plot_bar(seq_aa=None, seq_hydropathy=list, title="", xaxis="", yaxis=""):
+def plot_bar(seq_hydropathy, seq_aa=None, title="", xaxis="", yaxis=""):
+    """
+    plots the sequence (x) against the corresponding values (ex. hydropathy) (y)
+    :param seq_hydropathy: list with hydropathy values corresponding to amino acid sequence
+    :param seq_aa: generally a string
+    :param title: title of plot
+    :param xaxis: xaxis label
+    :param yaxis: yaxis label
+    :return:
+    """
     if isinstance(seq_aa, str) == True:
         sequence_aa_list = []
         for pos, aminoacid in enumerate(seq_aa):
@@ -151,10 +149,18 @@ def plot_bar(seq_aa=None, seq_hydropathy=list, title="", xaxis="", yaxis=""):
 
 
 if __name__ == '__main__':
-    seq = sequence_from_fasta("./P32249.fasta")
-    mapping_dict = mapping_dict("../data/amino_acid_properties.csv")
-    sequence_hydropathy = hydropathy_sequence_list(seq, mapping_dict)
-    plot_bar(seq, seq_hydropathy=sequence_hydropathy, title="Hydropathy Along G Protein Sequence",
-             xaxis="G Protein Sequence", yaxis="Hydropathy")
-    window = sliding_window_hydropathy(seq, mapping_dict, 10)
-    plot_bar(seq_hydropathy=window)
+    # seq = sequence_from_fasta("./P32249.fasta")
+    # mapping_dict = mapping_dict("../data/amino_acid_properties.csv")
+    # sequence_hydropathy = hydropathy_sequence_list(seq, mapping_dict)
+    # plot_bar(seq_hydropathy=sequence_hydropathy, seq_aa=seq, title="Hydropathy Along G Protein Sequence",
+    #          xaxis="G Protein Sequence", yaxis="Hydropathy")
+    # window = sliding_window_hydropathy(seq, mapping_dict, 15)
+    # plot_bar(seq_hydropathy=window)
+    # plot_bubble(seq_hydropathy=sequence_hydropathy, seq_aa=seq, title="Hydropathy")
+
+    parser =argparse.ArgumentParser()
+    parser.add_argument("--fasta_file", help="FASTA file with the sequence to be analyzed. ", type=str)
+    args = parser.parse_args()
+    fasta_file_string = args.fasta_file
+
+    sequence_from_fasta=sequence_from_fasta(fasta_file_string)

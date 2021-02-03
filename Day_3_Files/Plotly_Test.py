@@ -1,7 +1,7 @@
 import plotly
 import plotly.graph_objects as go
 import pandas as pd
-
+from collections import deque
 
 def sequence_from_fasta(fastafile):
     with open(fastafile) as fasta:
@@ -30,7 +30,7 @@ def hydropathy_sequence_list(sequence, mapping_dict):
     :return:
     """
     sequence_as_hydropathy = []
-    for pos, aminoacid in enumerate(sequence):         #check
+    for pos, aminoacid in enumerate(sequence):
         sequence_as_hydropathy.append(mapping_dict.get(sequence[pos]))
     return sequence_as_hydropathy
 
@@ -84,10 +84,24 @@ def plot_sequence_bubble(sequence_aa, sequence_hydropathy):
     fig.show()
     return
 
+
+def sliding_window_hydropathy(sequence, mapping_dict, length):
+    sequence_as_hydropathy_window = deque([], maxlen=length)
+    averaged_hydropathy_list = []
+    for pos, aa in enumerate(sequence):
+        sequence_as_hydropathy_window.append(mapping_dict.get(sequence[pos]))
+        if pos > len(sequence) + length:
+            break
+        average = sum(sequence_as_hydropathy_window)/len(sequence_as_hydropathy_window)
+        averaged_hydropathy_list.append(average)
+    return averaged_hydropathy_list
+
+
 if __name__ == '__main__':
     sequence = sequence_from_fasta("./P32249.fasta")
     mapping_dict = mapping_dict("../data/amino_acid_properties.csv")
     sequence_hydropathy = hydropathy_sequence_list(sequence, mapping_dict)
-    plot_sequence_bubble(sequence, sequence_hydropathy)
-
-
+    # plot_sequence_bubble(sequence, sequence_hydropathy)
+    window = sliding_window_hydropathy(sequence, mapping_dict, 10)
+    print(window)
+    plot_sequence_bar()

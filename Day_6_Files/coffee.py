@@ -27,25 +27,42 @@ print(df_thin_name)
 for column_name in df_thin_name:
     list_elements = df_thin_name[column_name].dropna().unique()
 
-    counts = df_thin_name[column_name].value_counts()
+    counts = df_thin_name[column_name].value_counts()   # series
 
     yvalues = []
-    for element in list_elements:
+    for element in list_elements:       # ex country in list of countries
         yvalues.append(counts.loc[element])
 
-    data = [
-        go.Bar(
-            x=list_elements,
-            y=yvalues
-        )
-    ]
-    fig = go.Figure(data=data)
-    fig.update_layout(title_text="coffee arabica",
-                      xaxis=dict(
-                          title=str(column_name)
-                      ),
-                      yaxis=dict(
-                          title="# of " + str(column_name)
-                      ))
-    fig.show()
+    # data = [
+    #     go.Bar(
+    #         x=list_elements,
+    #         y=yvalues
+    #     )
+    # ]
+    # fig = go.Figure(data=data)
+    # fig.update_layout(title_text="Coffee Arabica",
+    #                   xaxis=dict(
+    #                       title=str(column_name)
+    #                   ),
+    #                   yaxis=dict(
+    #                       title=str(column_name) + " Counts"
+    #                   ))
+    # fig.show()
 
+    # * Which countries have more than 10 and less than 30 entries?
+    if column_name == "Country of Origin":
+        more10less30 = []
+        for element in list_elements:
+            if 30 > counts.loc[element] > 10:
+                more10less30.append(element)
+        print("Countries with >10 but <30 entries: ", more10less30)
+
+    elif column_name == "Producer":
+        maxprodvalue = max(yvalues)
+
+        print("The producer with the most entries is: ", maxprod)
+
+    # else :
+
+ # * Which is the producer with most entries?
+ # * What is the mosts common and least common "Processing Method"

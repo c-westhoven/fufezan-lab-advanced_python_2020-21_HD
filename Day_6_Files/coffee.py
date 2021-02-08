@@ -27,24 +27,38 @@ for column_name in df_thin_name:
     list_elements = df_thin_name[column_name].dropna().unique()
 
     counts = df_thin_name[column_name].value_counts()   # series
-    print(counts.quantile(.9))
 
-    # yvalues = []
-    # for element in list_elements:       # ex country in list of countries
-    #     yvalues.append(counts.loc[element])
+    yvalues = []
+    for element in list_elements:       # ex country in list of countries
+        yvalues.append(counts.loc[element])
 
     # classifiying outliers
     # set outliers to median
     median = float(counts.median())
     yvalues_amend = []
     for element in list_elements:       # country in list of countries
-        if counts.loc[element] > counts.quantile(.9):
+        if counts.loc[element] > counts.quantile(.9):   # larger than 9th quantile
             yvalues_amend.append(median)
-        elif counts.loc[element] < counts.quantile(.1):
+        elif counts.loc[element] < counts.quantile(.1):     # smaller than 1st quantile
             yvalues_amend.append(median)
         else:
             yvalues_amend.append(counts.loc[element])
 
+    data = [
+        go.Bar(
+            x=list_elements,
+            y=yvalues
+        )
+    ]
+    fig = go.Figure(data=data)
+    fig.update_layout(title_text="Coffee Arabica",
+                      xaxis=dict(
+                          title=str(column_name)
+                      ),
+                      yaxis=dict(
+                          title=str(column_name) + " Counts"
+                      ))
+    fig.show()
 
     data = [
         go.Bar(
@@ -53,7 +67,7 @@ for column_name in df_thin_name:
         )
     ]
     fig = go.Figure(data=data)
-    fig.update_layout(title_text="Coffee Arabica",
+    fig.update_layout(title_text="Coffee Arabica Amended",
                       xaxis=dict(
                           title=str(column_name)
                       ),

@@ -57,12 +57,14 @@ for column_name in df_thin_name:
                 more10less30.append(element)
         print("Countries with >10 but <30 entries: ", more10less30)
 
+    # * Which is the producer with most entries?
     elif column_name == "Producer":
-        maxprodvalue = max(yvalues)
-
+        maxprod = counts.idxmax()
         print("The producer with the most entries is: ", maxprod)
 
-    # else :
+    # * What is the mosts common and least common "Processing Method"
+    elif column_name == "Processing Method":
+        most_common = counts.idxmax()
+        least_common = counts.idxmin()
+        print("Most common processing method: ", most_common, "Least common processing method: ", least_common)
 
- # * Which is the producer with most entries?
- # * What is the mosts common and least common "Processing Method"

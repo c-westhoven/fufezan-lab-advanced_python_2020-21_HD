@@ -22,27 +22,17 @@ df_thin = df.drop(df.columns.difference(["Country.of.Origin", "Producer", "Proce
 df_thin_name = df_thin.rename(columns={"Country.of.Origin": "Country of Origin", "Processing.Method": "Processing Method"})
 print(df_thin_name)
 
-
-# plotting: how do you plot this? these aren't numbers
 # make columns into lists
 # column_name = "Country of Origin" or "Producer" or "Processing Method"
 for column_name in df_thin_name:
     column_name_simple = df_thin_name[column_name].dropna().unique()
 
-# countries = df_thin_name["Country of Origin"].dropna().unique()
-# prod = df_thin_name["Producer"].unique().tolist()
-# process = df_thin_name["Processing Method"].unique().tolist()
-
     counts = df_thin_name[column_name].value_counts()
-# number_producers = df_thin_name["Producer"].value_counts()
-# number_process = df_thin_name["Processing Method"].value_counts()
 
     yvalues = []
     for element in column_name_simple:
         yvalues.append(counts.loc[element])
 
-
-# country against country
     data = [
         go.Bar(
             x=column_name_simple,

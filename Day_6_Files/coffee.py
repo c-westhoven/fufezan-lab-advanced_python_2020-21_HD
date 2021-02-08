@@ -25,37 +25,37 @@ print(df_thin_name)
 
 # plotting: how do you plot this? these aren't numbers
 # make columns into lists
-countries = df_thin_name["Country of Origin"].dropna().unique()
-prod = df_thin_name["Producer"].unique().tolist()
-process = df_thin_name["Processing Method"].unique().tolist()
+# column_name = "Country of Origin" or "Producer" or "Processing Method"
+for column_name in df_thin_name:
+    column_name_simple = df_thin_name[column_name].dropna().unique()
 
-# print(countries)
+# countries = df_thin_name["Country of Origin"].dropna().unique()
+# prod = df_thin_name["Producer"].unique().tolist()
+# process = df_thin_name["Processing Method"].unique().tolist()
 
-number_countries = df_thin_name["Country of Origin"].value_counts()
-number_producers = df_thin_name["Producer"].value_counts()
-number_process = df_thin_name["Processing Method"].value_counts()
+    counts = df_thin_name[column_name].value_counts()
+# number_producers = df_thin_name["Producer"].value_counts()
+# number_process = df_thin_name["Processing Method"].value_counts()
 
-print(type(number_countries)) # Series
-
-yvalues = []
-for country in countries:
-    yvalues.append(number_countries.loc[country])
+    yvalues = []
+    for element in column_name_simple:
+        yvalues.append(counts.loc[element])
 
 
 # country against country
-data = [
-    go.Bar(
-        x=countries,
-        y=yvalues
-    )
-]
-fig = go.Figure(data=data)
-fig.update_layout(title_text="coffee arabica",
-                  xaxis=dict(
-                      title="countries"
-                  ),
-                  yaxis=dict(
-                      title="# of countries"
-                  ))
-fig.show()
+    data = [
+        go.Bar(
+            x=column_name_simple,
+            y=yvalues
+        )
+    ]
+    fig = go.Figure(data=data)
+    fig.update_layout(title_text="coffee arabica",
+                      xaxis=dict(
+                          title=str(column_name)
+                      ),
+                      yaxis=dict(
+                          title="# of " + str(column_name)
+                      ))
+    fig.show()
 

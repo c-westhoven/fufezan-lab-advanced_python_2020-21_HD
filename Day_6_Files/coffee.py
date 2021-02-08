@@ -20,7 +20,6 @@ df_thin = df.drop(df.columns.difference(["Country.of.Origin", "Producer", "Proce
 
 # rename
 df_thin_name = df_thin.rename(columns={"Country.of.Origin": "Country of Origin", "Processing.Method": "Processing Method"})
-print(df_thin_name)
 
 # make columns into lists
 # column_name = "Country of Origin" or "Producer" or "Processing Method"
@@ -33,21 +32,32 @@ for column_name in df_thin_name:
     for element in list_elements:       # ex country in list of countries
         yvalues.append(counts.loc[element])
 
-    # data = [
-    #     go.Bar(
-    #         x=list_elements,
-    #         y=yvalues
-    #     )
-    # ]
-    # fig = go.Figure(data=data)
-    # fig.update_layout(title_text="Coffee Arabica",
-    #                   xaxis=dict(
-    #                       title=str(column_name)
-    #                   ),
-    #                   yaxis=dict(
-    #                       title=str(column_name) + " Counts"
-    #                   ))
-    # fig.show()
+    # classifiying outliers
+    # set outliers to median
+    median = counts.median()
+    yvalues_amend = []
+    for element in list_elements:       # country in list of countries
+        if .9 * counts.mean() < counts.loc(element) or counts.loc(element) < .1 * counts.mean():
+            yvalues_amend = yvalues_amend.append(median)
+        else:
+            yvalues_amend = yvalues_amend.append(counts.loc[element])
+
+
+    data = [
+        go.Bar(
+            x=list_elements,
+            y=yvalues_amend
+        )
+    ]
+    fig = go.Figure(data=data)
+    fig.update_layout(title_text="Coffee Arabica",
+                      xaxis=dict(
+                          title=str(column_name)
+                      ),
+                      yaxis=dict(
+                          title=str(column_name) + " Counts"
+                      ))
+    fig.show()
 
     # * Which countries have more than 10 and less than 30 entries?
     if column_name == "Country of Origin":
@@ -67,4 +77,6 @@ for column_name in df_thin_name:
         most_common = counts.idxmax()
         least_common = counts.idxmin()
         print("Most common processing method: ", most_common, "Least common processing method: ", least_common)
+
+
 

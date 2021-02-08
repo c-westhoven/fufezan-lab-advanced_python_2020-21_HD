@@ -25,17 +25,17 @@ print(df_thin_name)
 # make columns into lists
 # column_name = "Country of Origin" or "Producer" or "Processing Method"
 for column_name in df_thin_name:
-    column_name_simple = df_thin_name[column_name].dropna().unique()
+    list_elements = df_thin_name[column_name].dropna().unique()
 
     counts = df_thin_name[column_name].value_counts()
 
     yvalues = []
-    for element in column_name_simple:
+    for element in list_elements:
         yvalues.append(counts.loc[element])
 
     data = [
         go.Bar(
-            x=column_name_simple,
+            x=list_elements,
             y=yvalues
         )
     ]

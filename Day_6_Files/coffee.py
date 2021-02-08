@@ -27,20 +27,23 @@ for column_name in df_thin_name:
     list_elements = df_thin_name[column_name].dropna().unique()
 
     counts = df_thin_name[column_name].value_counts()   # series
+    print(counts.quantile(.9))
 
-    yvalues = []
-    for element in list_elements:       # ex country in list of countries
-        yvalues.append(counts.loc[element])
+    # yvalues = []
+    # for element in list_elements:       # ex country in list of countries
+    #     yvalues.append(counts.loc[element])
 
     # classifiying outliers
     # set outliers to median
-    median = counts.median()
+    median = float(counts.median())
     yvalues_amend = []
     for element in list_elements:       # country in list of countries
-        if .9 * counts.mean() < counts.loc(element) or counts.loc(element) < .1 * counts.mean():
-            yvalues_amend = yvalues_amend.append(median)
+        if counts.loc[element] > counts.quantile(.9):
+            yvalues_amend.append(median)
+        elif counts.loc[element] < counts.quantile(.1):
+            yvalues_amend.append(median)
         else:
-            yvalues_amend = yvalues_amend.append(counts.loc[element])
+            yvalues_amend.append(counts.loc[element])
 
 
     data = [

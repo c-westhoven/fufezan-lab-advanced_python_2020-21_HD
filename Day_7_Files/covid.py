@@ -4,6 +4,7 @@ import urllib.request
 import pandas as pd
 import plotly.graph_objects as go
 import plotly.io as pio
+from datetime import datetime
 pio.renderers.default = "browser"
 
 def url_to_df(url):
@@ -54,10 +55,35 @@ def delete_neg_rows(df, column):
     :param column:
     :return: clean_df
     """
-    listidx = df.index[df[column] < 0].tolist()
-    df_del = df.drop(labels=listidx, axis=0)
-    df_clean = df_del.dropna()
+    if column == "date_rep":
+        listidx = df.index[df[column] > df.loc[0, "date_rep"].now()].tolist()
+        df_del = df.drop(labels=listidx, axis=0)
+        df_clean = df_del.dropna()
+    else:
+        listidx = df.index[df[column] < 0].tolist()
+        df_del = df.drop(labels=listidx, axis=0)
+        df_clean = df_del.dropna()
     return df_clean
+
+
+def find_incidence_rate(df):
+    """
+    given the data frame, it looks at 14d incidence of each country, and divides highest - lowest incidence/ by time difference between measurements
+    :param df:
+    :return:
+    """
+    array_countries = df["countries_terr"].unique()
+
+    dictionary = {}
+    for country, pos in array_countries:
+        incidences = df.groupby["countries_terr", "14d_incidence"].get_group(array_countries[pos]).agg(["min", "max"])
+        max_inc = max(incidences)
+        min_inc = min(incidences)
+        max_time = df.date_rep[df["14d_incidence"].idxmax]
+        min_time = df.date_rep[df["14d_incidence"].idxmin]
+        dictionary[str(country)] = float(max_inc - min_inc) / float(max_time - min_time)
+    return dictionary
+
 
 
 if __name__ == "__main__":
@@ -97,10 +123,24 @@ if __name__ == "__main__":
     cdf_clean = delete_neg_rows(cdf_clean, "deaths_weekly")
     cdf_clean = delete_neg_rows(cdf_clean, "14d_incidence")
     cdf_clean = delete_neg_rows(cdf_clean, "pop_data_2019")
+    cdf_clean = delete_neg_rows(cdf_clean, "date_rep")
 
     # cleaned hists
     create_hist(cdf_clean, "cases_weekly", "cases weekly")
     create_hist(cdf_clean, "deaths_weekly", "deaths weekly")
     create_hist(cdf_clean, "14d_incidence", "14d")
 
-    # countries, grouped by continent which show most drastic incerase and decrease of 14d incidence
+    # countries, grouped by continent which show most drastic increase and decrease of 14d incidence
+    cdf_group = cdf_clean.groupby("continent").describe()
+    grp = cdf_clean[["continent", "countries_terr", "14d_incidence", "date_rep"]].groupby("continent")
+    grp.head()
+
+    # idea how o define most drastic increase and decrease
+    # look at each country, find min 14d incidence and max 14d incidence and divide by times difference of incidence == out of this find highest and lowest
+
+    print(cdf_group)
+
+    test = find_incidence_rate(cdf_clean)
+
+    test = cdf_clean.groupby(["continent"])
+    test.get_group("Aghanistan")

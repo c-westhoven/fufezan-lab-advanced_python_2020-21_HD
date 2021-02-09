@@ -2,8 +2,9 @@ import ssl
 import json
 import urllib.request
 import pandas as pd
-import plotly.express as px
-
+import plotly.graph_objects as go
+import plotly.io as pio
+pio.renderers.default = "browser"
 
 def url_to_df(url):
     covid_json_unformated = urllib.request.urlopen(url).read().decode("utf-8")
@@ -31,9 +32,16 @@ def delta_time(df, date_time_column, newname):
     return df
 
 
-def create_hist(df, xaxis="", yaxis=""):
-    df = px.df.deaths_weekly()
-    fig = px.histogram(df, x=xaxis, y=yaxis)
+def create_hist(df, column, title="", xaxis="", yaxis=""):
+    data = [
+        go.Histogram(
+            x=df[column]
+        )
+    ]
+    fig = go.Figure(data=data)
+    fig.update_layout(title=title)
+    fig.layout.xaxis.title=xaxis
+    fig.layout.yaxis.title=yaxis
     fig.show()
     return
 
@@ -65,6 +73,11 @@ if __name__ == "__main__":
     # describe dataframe
     described = cdf.describe()
     # there are negative min values in cases_weekly, deaths_weekly, and 14d_incidence
+    # neg values can also be seen in histogram
+    create_hist(cdf, "cases_weekly", "cases weekly")
+    create_hist(cdf, "deaths_weekly", "deaths weekly")
+    create_hist(cdf, "14d_incidence", "14d")
 
+    # clean (delete negative values and their rows)
 
 

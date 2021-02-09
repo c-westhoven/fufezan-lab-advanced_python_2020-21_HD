@@ -46,6 +46,20 @@ def create_hist(df, column, title="", xaxis="", yaxis=""):
     return
 
 
+def delete_neg_rows(df, column):
+    """
+    deletes rows that have neg or NaN elements in a column
+    no inplace, so original df still contains bad elements
+    :param df:
+    :param column:
+    :return: clean_df
+    """
+    listidx = df.index[df[column] < 0].tolist()
+    df_del = df.drop(labels=listidx, axis=0)
+    df_clean = df_del.dropna()
+    return df_clean
+
+
 if __name__ == "__main__":
     ssl._create_default_https_context = ssl._create_unverified_context
     covid_url = "https://opendata.ecdc.europa.eu/covid19/casedistribution/json/"
@@ -79,5 +93,14 @@ if __name__ == "__main__":
     create_hist(cdf, "14d_incidence", "14d")
 
     # clean (delete negative values and their rows)
+    cdf_clean = delete_neg_rows(cdf, "cases_weekly")
+    cdf_clean = delete_neg_rows(cdf_clean, "deaths_weekly")
+    cdf_clean = delete_neg_rows(cdf_clean, "14d_incidence")
+    cdf_clean = delete_neg_rows(cdf_clean, "pop_data_2019")
 
+    # cleaned hists
+    create_hist(cdf_clean, "cases_weekly", "cases weekly")
+    create_hist(cdf_clean, "deaths_weekly", "deaths weekly")
+    create_hist(cdf_clean, "14d_incidence", "14d")
 
+    # countries, grouped by continent which show most drastic incerase and decrease of 14d incidence

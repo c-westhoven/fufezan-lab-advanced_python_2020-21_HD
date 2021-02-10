@@ -4,7 +4,7 @@ import urllib.request
 import pandas as pd
 import plotly.graph_objects as go
 import plotly.io as pio
-from datetime import datetime
+from datetime import datetime, timedelta
 pio.renderers.default = "browser"
 
 def url_to_df(url):
@@ -72,17 +72,41 @@ def find_incidence_rate(df):
     :param df:
     :return:
     """
-    array_countries = df["countries_terr"].unique()
+    array_countries = list(df["countries_terr"].unique())
+    list_continents = list(df["continents"].unique())
 
     dictionary = {}
-    for country, pos in array_countries:
-        incidences = df.groupby["countries_terr", "14d_incidence"].get_group(array_countries[pos]).agg(["min", "max"])
-        max_inc = max(incidences)
-        min_inc = min(incidences)
+    for pos, country in enumerate(array_countries):
+        incidences = df[["countries_terr", "14d_incidence"]].groupby(["countries_terr"]).get_group((array_countries[pos]))
+        max_inc = max(incidences["14d_incidence"])
+        min_inc = min(incidences["14d_incidence"])
         max_time = df.date_rep[df["14d_incidence"].idxmax]
         min_time = df.date_rep[df["14d_incidence"].idxmin]
-        dictionary[str(country)] = float(max_inc - min_inc) / float(max_time - min_time)
+        time_diff = (max_time - min_time)/timedelta(days=1)
+        dictionary[str(country)] = float(max_inc - min_inc) / time_diff
     return dictionary
+
+
+def find_inc_rate(df):
+    data = []
+    data2 = []
+    for continent, cont_grp in df.groupby("continent"):
+        for country, country_group in cont_grp.groupby("countries_terr"):
+            diffs = country_group.set_index("delta_time").sort_index()["14d_incidence"].diff().fillna(0)
+            max_diff = max(diffs)
+            min_diff = min(diffs)
+            data.append([continent, country, max_diff, min_diff])
+    fdf = pd.DataFrame(data, columns=["continent", "country", "max_diff", "min_diff"])
+    for continent, cont_grp in fdf.groupby("continent"):
+
+        data2.append([continent, country, incidence, min_or_max])
+    fdf2 = pd.DataFrame(data2, columns=["continent", "country", "incidence", "min or max"])
+    return fdf2
+
+
+    # test = cdf_clean[["continent", "countries_terr", "14d_incidence"]].groupby(["countries_terr"]).get_group(("China"))
+    # maxim = max(test["14d_incidence"])
+    # test.get_group(("China"))
 
 
 
@@ -114,9 +138,9 @@ if __name__ == "__main__":
     described = cdf.describe()
     # there are negative min values in cases_weekly, deaths_weekly, and 14d_incidence
     # neg values can also be seen in histogram
-    create_hist(cdf, "cases_weekly", "cases weekly")
-    create_hist(cdf, "deaths_weekly", "deaths weekly")
-    create_hist(cdf, "14d_incidence", "14d")
+    # create_hist(cdf, "cases_weekly", "cases weekly")
+    # create_hist(cdf, "deaths_weekly", "deaths weekly")
+    # create_hist(cdf, "14d_incidence", "14d")
 
     # clean (delete negative values and their rows)
     cdf_clean = delete_neg_rows(cdf, "cases_weekly")
@@ -126,21 +150,20 @@ if __name__ == "__main__":
     cdf_clean = delete_neg_rows(cdf_clean, "date_rep")
 
     # cleaned hists
-    create_hist(cdf_clean, "cases_weekly", "cases weekly")
-    create_hist(cdf_clean, "deaths_weekly", "deaths weekly")
-    create_hist(cdf_clean, "14d_incidence", "14d")
+    # create_hist(cdf_clean, "cases_weekly", "cases weekly")
+    # create_hist(cdf_clean, "deaths_weekly", "deaths weekly")
+    # create_hist(cdf_clean, "14d_incidence", "14d")
 
     # countries, grouped by continent which show most drastic increase and decrease of 14d incidence
     cdf_group = cdf_clean.groupby("continent").describe()
     grp = cdf_clean[["continent", "countries_terr", "14d_incidence", "date_rep"]].groupby("continent")
-    grp.head()
+    # grp.head()
 
     # idea how o define most drastic increase and decrease
     # look at each country, find min 14d incidence and max 14d incidence and divide by times difference of incidence == out of this find highest and lowest
 
     print(cdf_group)
 
-    test = find_incidence_rate(cdf_clean)
+    test = find_inc_rate(cdf_clean)
 
-    test = cdf_clean.groupby(["continent"])
-    test.get_group("Aghanistan")
+

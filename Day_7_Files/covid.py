@@ -6,6 +6,8 @@ import plotly.graph_objects as go
 import plotly.io as pio
 from datetime import datetime, timedelta
 pio.renderers.default = "browser"
+import numpy as np
+
 
 def url_to_df(url):
     covid_json_unformated = urllib.request.urlopen(url).read().decode("utf-8")
@@ -66,25 +68,53 @@ def delete_neg_rows(df, column):
     return df_clean
 
 
-def find_incidence_rate(df):
-    """
-    given the data frame, it looks at 14d incidence of each country, and divides highest - lowest incidence/ by time difference between measurements
-    :param df:
-    :return:
-    """
-    array_countries = list(df["countries_terr"].unique())
-    list_continents = list(df["continents"].unique())
+# def find_incidence_rate(df):
+#     """
+#     given the data frame, it looks at 14d incidence of each country, and divides highest - lowest incidence/ by time difference between measurements
+#     :param df:
+#     :return:
+#     """
+#     array_countries = list(df["countries_terr"].unique())
+#     list_continents = list(df["continents"].unique())
+#
+#     dictionary = {}
+#     for pos, country in enumerate(array_countries):
+#         incidences = df[["countries_terr", "14d_incidence"]].groupby(["countries_terr"]).get_group((array_countries[pos]))
+#         max_inc = max(incidences["14d_incidence"])
+#         min_inc = min(incidences["14d_incidence"])
+#         max_time = df.date_rep[df["14d_incidence"].idxmax]
+#         min_time = df.date_rep[df["14d_incidence"].idxmin]
+#         time_diff = (max_time - min_time)/timedelta(days=1)
+#         dictionary[str(country)] = float(max_inc - min_inc) / time_diff
+#     return dictionary
 
-    dictionary = {}
-    for pos, country in enumerate(array_countries):
-        incidences = df[["countries_terr", "14d_incidence"]].groupby(["countries_terr"]).get_group((array_countries[pos]))
-        max_inc = max(incidences["14d_incidence"])
-        min_inc = min(incidences["14d_incidence"])
-        max_time = df.date_rep[df["14d_incidence"].idxmax]
-        min_time = df.date_rep[df["14d_incidence"].idxmin]
-        time_diff = (max_time - min_time)/timedelta(days=1)
-        dictionary[str(country)] = float(max_inc - min_inc) / time_diff
-    return dictionary
+
+def find_inc_rate_cont(df):
+    data = []
+    data2 = []
+    for continent, cont_grp in df.groupby("continent"):
+        for country, country_group in cont_grp.groupby("countries_terr"):
+            diffs = country_group.set_index("delta_time").sort_index()["14d_incidence"].diff().fillna(0)
+            max_diffs = float(max(diffs))
+            min_diffs = float(min(diffs))
+            data.append([continent, country, max_diffs, min_diffs])
+    fdf = pd.DataFrame(data, columns=["continent", "country", "max_diffs", "min_diffs"])
+    fdf["max_diffs"] = pd.to_numeric(fdf["max_diffs"])
+    fdf["min_diffs"] = pd.to_numeric(fdf["min_diffs"])
+
+    for continent, cont_grp in fdf.groupby("continent"):
+        country_max = fdf["country"].iloc[cont_grp["max_diffs"].idxmax]
+        country_min = fdf["country"].iloc[cont_grp["min_diffs"].idxmin]
+        max_diff_cont = max(cont_grp.max_diffs)
+        min_diff_cont = min(cont_grp.min_diffs)
+        data2.append([continent, country_max, max_diff_cont, country_min, min_diff_cont])
+    incidence = pd.DataFrame(data2, columns=["continent", "country_max", "max_diff", "country_min", "min_diff"])
+
+    # not working part
+    # incidence = fdf.groupby(["continent"]).agg({"country_max": fdf["country"].iloc(fdf["max_diffs"].idxmax), "max_diffs": np.max,
+    #                                             "country_min": fdf["country"].iloc(fdf["min_diffs"].idxmin),  "min_diffs": np.min})
+
+    return incidence
 
 
 def find_inc_rate(df):
@@ -93,15 +123,30 @@ def find_inc_rate(df):
     for continent, cont_grp in df.groupby("continent"):
         for country, country_group in cont_grp.groupby("countries_terr"):
             diffs = country_group.set_index("delta_time").sort_index()["14d_incidence"].diff().fillna(0)
-            max_diff = max(diffs)
-            min_diff = min(diffs)
-            data.append([continent, country, max_diff, min_diff])
-    fdf = pd.DataFrame(data, columns=["continent", "country", "max_diff", "min_diff"])
-    for continent, cont_grp in fdf.groupby("continent"):
+            max_diffs = float(max(diffs))
+            min_diffs = float(min(diffs))
+            data.append([continent, country, max_diffs, min_diffs])
+    fdf = pd.DataFrame(data, columns=["continent", "country", "max_diffs", "min_diffs"])
+    fdf["max_diffs"] = pd.to_numeric(fdf["max_diffs"])
+    fdf["min_diffs"] = pd.to_numeric(fdf["min_diffs"])
 
-        data2.append([continent, country, incidence, min_or_max])
-    fdf2 = pd.DataFrame(data2, columns=["continent", "country", "incidence", "min or max"])
-    return fdf2
+    country_max = fdf["country"].iloc[fdf["max_diffs"].idxmax]
+    country_min = fdf["country"].iloc[fdf["min_diffs"].idxmin]
+    max_diff_cont = max(fdf.max_diffs)
+    min_diff_cont = min(fdf.min_diffs)
+    data2.append([country_max, max_diff_cont, country_min, min_diff_cont])
+    incidence = pd.DataFrame(data2, columns=["country_max", "max_diff", "country_min", "min_diff"])
+
+    return incidence
+
+# a_pandas["min_difs"] = pd.to_numeric(a_pandas["min_difs"])
+# a_pandas["max_difs"] = pd.to_numeric(a_pandas["max_difs"])
+#     incidence = cont_grp.agg({"max_diff": "max", "min"})
+#     country = fdf.country[fdf[fdf["max_diff"] == max(incidence)].index]
+#     data2.append([continent, country, incidence])
+#
+#
+# fdf2 = pd.DataFrame(data2, columns=["continent", "country", "incidence"])
 
 
     # test = cdf_clean[["continent", "countries_terr", "14d_incidence"]].groupby(["countries_terr"]).get_group(("China"))
@@ -160,10 +205,13 @@ if __name__ == "__main__":
     # grp.head()
 
     # idea how o define most drastic increase and decrease
-    # look at each country, find min 14d incidence and max 14d incidence and divide by times difference of incidence == out of this find highest and lowest
+    # by continent
+    incidence_df_cont = find_inc_rate_cont(cdf_clean)
+    # by world
+    incidence_gen = find_inc_rate(cdf_clean)
 
-    print(cdf_group)
+    #
 
-    test = find_inc_rate(cdf_clean)
+
 
 

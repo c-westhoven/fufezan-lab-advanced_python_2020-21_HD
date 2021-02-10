@@ -7,6 +7,7 @@ import plotly.io as pio
 from datetime import datetime, timedelta
 pio.renderers.default = "browser"
 import numpy as np
+import plotly.express as px
 
 
 def url_to_df(url):
@@ -142,6 +143,24 @@ def find_inc_rate(df):
 
     return incidence
 
+
+def find_inc_rate_cont_plot(df, continent="Europe"):
+    cont_group = df.groupby("continent").get_group(continent)
+    fig = go.Figure()
+    for country, country_group in cont_group.groupby("countries_terr"):
+        day_incid = country_group.set_index("delta_time").sort_index()["14d_incidence"]
+        dates = country_group.set_index("delta_time").sort_index()["date_rep"]
+
+        fig.add_trace(go.Scatter(x=dates, y=day_incid,
+                             mode='lines',
+                             name= country))
+
+    fig.update_layout(title="14d incidences in" + str(continent))
+    fig.layout.xaxis.title = "Time"
+    fig.layout.yaxis.title = "14d_incidence"
+    fig.show()
+    return
+
 # a_pandas["min_difs"] = pd.to_numeric(a_pandas["min_difs"])
 # a_pandas["max_difs"] = pd.to_numeric(a_pandas["max_difs"])
 #     incidence = cont_grp.agg({"max_diff": "max", "min"})
@@ -211,13 +230,13 @@ if __name__ == "__main__":
     # grp.head()
 
     # idea how o define most drastic increase and decrease
-    # by continent
+    # by continent per year
     incidence_df_cont = find_inc_rate_cont(cdf_clean)
-    # # by world
+    # by world per year
     incidence_gen = find_inc_rate(cdf_clean)
 
-
-    #
+    # line plot for 14d_incidences for all European, groupby to generate data list for plotly plot
+    plot = find_inc_rate_cont_plot(cdf_clean, continent="Europe")
 
 
 

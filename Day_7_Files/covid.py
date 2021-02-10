@@ -93,12 +93,11 @@ def find_inc_rate_cont(df):
     data = []
     data2 = []
 
-    for i in range(df.shape[0]):
-        df[i, 'year'] = df.loc[i, 'date_rep'].year
+    # df['year'] = df['date_rep'].year
 
     for continent, cont_grp in df.groupby("continent"):
         for country, country_group in cont_grp.groupby("countries_terr"):
-            for year, year_group in country_group.groupby("date_rep"):
+            for year, year_group in country_group.groupby("year"):
                 diffs = year_group.set_index("delta_time").sort_index()["14d_incidence"].diff().fillna(0)
                 max_diffs = float(max(diffs))
                 min_diffs = float(min(diffs))
@@ -108,14 +107,14 @@ def find_inc_rate_cont(df):
     fdf["min_diffs"] = pd.to_numeric(fdf["min_diffs"])
 
     for continent, cont_grp in fdf.groupby("continent"):
-        country_max = fdf["country"].iloc[cont_grp["max_diffs"].idxmax]
-        country_min = fdf["country"].iloc[cont_grp["min_diffs"].idxmin]
-        max_diff_cont = max(cont_grp.max_diffs)
-        min_diff_cont = min(cont_grp.min_diffs)
-        data2.append([continent, country_max, max_diff_cont, country_min, min_diff_cont])
-    incidence = pd.DataFrame(data2, columns=["continent", "country_max", "max_diff", "country_min", "min_diff"])
-                                         "country_min": fdf["country"].iloc(fdf["min_diffs"].idxmin), "min_diffs": np.min})
-
+        for year, year_grp in cont_grp.groupby("year"):
+            country_max = fdf["country"].iloc[year_grp["max_diffs"].idxmax]
+            country_min = fdf["country"].iloc[year_grp["min_diffs"].idxmin]
+            max_diff_cont = max(year_grp.max_diffs)
+            min_diff_cont = min(year_grp.min_diffs)
+            data2.append([continent, year, country_max, max_diff_cont, country_min, min_diff_cont])
+    incidence = pd.DataFrame(data2,
+                             columns=["continent", "year", "country_max", "max_diff", "country_min", "min_diff"])
     return incidence
 
 
@@ -124,20 +123,22 @@ def find_inc_rate(df):
     data2 = []
     for continent, cont_grp in df.groupby("continent"):
         for country, country_group in cont_grp.groupby("countries_terr"):
-            diffs = country_group.set_index("delta_time").sort_index()["14d_incidence"].diff().fillna(0)
-            max_diffs = float(max(diffs))
-            min_diffs = float(min(diffs))
-            data.append([continent, country, max_diffs, min_diffs])
-    fdf = pd.DataFrame(data, columns=["continent", "country", "max_diffs", "min_diffs"])
+            for year, year_group in country_group.groupby("year"):
+                diffs = year_group.set_index("delta_time").sort_index()["14d_incidence"].diff().fillna(0)
+                max_diffs = float(max(diffs))
+                min_diffs = float(min(diffs))
+                data.append([continent, country, year, max_diffs, min_diffs])
+    fdf = pd.DataFrame(data, columns=["continent", "country", "year", "max_diffs", "min_diffs"])
     fdf["max_diffs"] = pd.to_numeric(fdf["max_diffs"])
     fdf["min_diffs"] = pd.to_numeric(fdf["min_diffs"])
 
-    country_max = fdf["country"].iloc[fdf["max_diffs"].idxmax]
-    country_min = fdf["country"].iloc[fdf["min_diffs"].idxmin]
-    max_diff_cont = max(fdf.max_diffs)
-    min_diff_cont = min(fdf.min_diffs)
-    data2.append([country_max, max_diff_cont, country_min, min_diff_cont])
-    incidence = pd.DataFrame(data2, columns=["country_max", "max_diff", "country_min", "min_diff"])
+    for year, year_group in fdf.groupby("year"):
+        country_max = fdf["country"].iloc[year_group["max_diffs"].idxmax]
+        country_min = fdf["country"].iloc[year_group["min_diffs"].idxmin]
+        max_diff_cont = max(year_group.max_diffs)
+        min_diff_cont = min(year_group.min_diffs)
+        data2.append([year, country_max, max_diff_cont, country_min, min_diff_cont])
+    incidence = pd.DataFrame(data2, columns=["year", "country_max", "max_diff", "country_min", "min_diff"])
 
     return incidence
 
@@ -181,6 +182,9 @@ if __name__ == "__main__":
     # add new column with time since start of recording
     cdf = delta_time(cdf, "date_rep", "delta_time")
 
+    for i in range(cdf.shape[0]):
+        cdf.loc[i, 'year'] = cdf.loc[i, 'date_rep'].year
+
     # describe dataframe
     described = cdf.describe()
     # there are negative min values in cases_weekly, deaths_weekly, and 14d_incidence
@@ -209,8 +213,9 @@ if __name__ == "__main__":
     # idea how o define most drastic increase and decrease
     # by continent
     incidence_df_cont = find_inc_rate_cont(cdf_clean)
-    # by world
+    # # by world
     incidence_gen = find_inc_rate(cdf_clean)
+
 
     #
 

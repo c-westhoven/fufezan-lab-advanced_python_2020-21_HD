@@ -92,13 +92,18 @@ def delete_neg_rows(df, column):
 def find_inc_rate_cont(df):
     data = []
     data2 = []
+
+    for i in range(df.shape[0]):
+        df[i, 'year'] = df.loc[i, 'date_rep'].year
+
     for continent, cont_grp in df.groupby("continent"):
         for country, country_group in cont_grp.groupby("countries_terr"):
-            diffs = country_group.set_index("delta_time").sort_index()["14d_incidence"].diff().fillna(0)
-            max_diffs = float(max(diffs))
-            min_diffs = float(min(diffs))
-            data.append([continent, country, max_diffs, min_diffs])
-    fdf = pd.DataFrame(data, columns=["continent", "country", "max_diffs", "min_diffs"])
+            for year, year_group in country_group.groupby("date_rep"):
+                diffs = year_group.set_index("delta_time").sort_index()["14d_incidence"].diff().fillna(0)
+                max_diffs = float(max(diffs))
+                min_diffs = float(min(diffs))
+                data.append([continent, country, year, max_diffs, min_diffs])
+    fdf = pd.DataFrame(data, columns=["continent", "country", "year", "max_diffs", "min_diffs"])
     fdf["max_diffs"] = pd.to_numeric(fdf["max_diffs"])
     fdf["min_diffs"] = pd.to_numeric(fdf["min_diffs"])
 
@@ -109,10 +114,7 @@ def find_inc_rate_cont(df):
         min_diff_cont = min(cont_grp.min_diffs)
         data2.append([continent, country_max, max_diff_cont, country_min, min_diff_cont])
     incidence = pd.DataFrame(data2, columns=["continent", "country_max", "max_diff", "country_min", "min_diff"])
-
-    # not working part
-    # incidence = fdf.groupby(["continent"]).agg({"country_max": fdf["country"].iloc(fdf["max_diffs"].idxmax), "max_diffs": np.max,
-    #                                             "country_min": fdf["country"].iloc(fdf["min_diffs"].idxmin),  "min_diffs": np.min})
+                                         "country_min": fdf["country"].iloc(fdf["min_diffs"].idxmin), "min_diffs": np.min})
 
     return incidence
 

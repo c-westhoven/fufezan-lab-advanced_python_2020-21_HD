@@ -8,7 +8,8 @@ from datetime import datetime, timedelta
 pio.renderers.default = "browser"
 import numpy as np
 import plotly.express as px
-
+from collections import deque
+from statistics import mean
 
 def url_to_df(url):
     covid_json_unformated = urllib.request.urlopen(url).read().decode("utf-8")
@@ -148,10 +149,10 @@ def find_inc_rate_cont_plot(df, continent="Europe"):
     cont_group = df.groupby("continent").get_group(continent)
     fig = go.Figure()
     for country, country_group in cont_group.groupby("countries_terr"):
-        day_incid = country_group.set_index("delta_time").sort_index()["14d_incidence"]
+        country_incid = country_group.set_index("delta_time").sort_index()["14d_incidence"]
         dates = country_group.set_index("delta_time").sort_index()["date_rep"]
 
-        fig.add_trace(go.Scatter(x=dates, y=day_incid,
+        fig.add_trace(go.Scatter(x=dates, y=country_incid,
                              mode='lines',
                              name= country))
 
@@ -160,6 +161,39 @@ def find_inc_rate_cont_plot(df, continent="Europe"):
     fig.layout.yaxis.title = "14d_incidence"
     fig.show()
     return
+
+
+def inc_cont_plot_smooth(df, continent="Europe"):
+    cont_group = df.groupby("continent").get_group(continent)
+    fig = go.Figure()
+    country_window = deque([], 20)
+    date_window = deque([])
+    incid_threemonths = []
+    for country, country_group in cont_group.groupby("countries_terr"):
+        for pos, date in enumerate(country_group["date_rep"]):
+            country_window.append(country_group.set_index("delta_time").sort_index()["14d_incidence"])
+            date_window = date_window.append(country_group.set_index("delta_time").sort_index()["date_rep"])        # Series
+            incid_threemonths.append(mean(country_window))
+            fig.add_trace(go.Scatter(x=dates, y=incid_threemonths,
+                                 mode='lines',
+                                 name= country))
+
+    fig.update_layout(title="14d incidences in" + str(continent))
+    fig.layout.xaxis.title = "Time"
+    fig.layout.yaxis.title = "14d_incidence"
+    fig.show()
+    return
+
+# sequence_as_hydropathy_window = deque([], maxlen=length)
+#     averaged_hydropathy_list = []
+#     for pos, aa in enumerate(sequence):
+#         sequence_as_hydropathy_window.append(mapping_dict.get(sequence[pos]))
+#         if pos > len(sequence) + length:
+#             break
+#         average = sum(sequence_as_hydropathy_window) / len(sequence_as_hydropathy_window)
+#         averaged_hydropathy_list.append(average)
+#     return averaged_hydropathy_list
+
 
 # a_pandas["min_difs"] = pd.to_numeric(a_pandas["min_difs"])
 # a_pandas["max_difs"] = pd.to_numeric(a_pandas["max_difs"])
@@ -201,6 +235,7 @@ if __name__ == "__main__":
     # add new column with time since start of recording
     cdf = delta_time(cdf, "date_rep", "delta_time")
 
+    # add another column year, with just the year of the data
     for i in range(cdf.shape[0]):
         cdf.loc[i, 'year'] = cdf.loc[i, 'date_rep'].year
 
@@ -236,8 +271,9 @@ if __name__ == "__main__":
     incidence_gen = find_inc_rate(cdf_clean)
 
     # line plot for 14d_incidences for all European, groupby to generate data list for plotly plot
-    plot = find_inc_rate_cont_plot(cdf_clean, continent="Europe")
+    plot_europe = find_inc_rate_cont_plot(cdf_clean, continent="Europe")
 
-
+    # line plot smoothed version average 3 months
+    plot_europe_smooth = inc_cont_plot_smooth(cdf_clean, continent="Europe")
 
 

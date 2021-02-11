@@ -67,10 +67,40 @@ def msp_to_df(
     df = pd.DataFrame(dict).T
     return df, seqs
 
+def linear_search(mylist, find):
+    for x in mylist:
+        if x == find:
+            return True
+    return False
+
+
+def time():
+    SETUP_CODE = ''' 
+from __main__ import msp_to_df 
+import pandas as pd'''
+
+    TEST_CODE = ''' 
+msp_file = "./cptac2_mouse_hcd_selected.msp" 
+msp_to_df(msp_file) 
+    '''
+    # timeit.repeat statement
+    times = timeit.repeat(setup=SETUP_CODE,
+                          stmt=TEST_CODE,
+                          repeat=10,
+                          number=1)
+
+    # priniting minimum exec. time
+    print('time: {}'.format(min(times)))
 
 if __name__ == '__main__':
-    msp_file = "./cptac2_mouse_hcd_selected.msp"
-    df, seq = msp_to_df(msp_file)
-    # print(df, seq)
-    print(timeit.timeit("msp_to_df()", setup="from __main__ import msp_to_df"))
+    # msp_file = "./cptac2_mouse_hcd_selected.msp"
+    # df, seq = msp_to_df(msp_file)
+    # # print(df, seq)
+    # mysetup = "from __main__ import msp_to_df"
+    # test = "msp_file = './cptac2_mouse_hcd_selected.msp'" \
+    #        "msp_to_df(msp_file)"
+    # print(timeit.timeit(setup = mysetup, stmt = test))
+
+    time()
+
 

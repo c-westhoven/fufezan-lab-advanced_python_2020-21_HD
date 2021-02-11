@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import timeit
 
+
 def msp_to_df(
     input_file,
     max_seq_len=30,
@@ -27,65 +28,70 @@ def msp_to_df(
 
     with open(msp_file) as file:
 
-        df_list = []
-        for line in file:
-            if line.startswith("Name: "):
-                line = line.replace(str(line[line.index("/"):]), "")
-                df_list.append(line.replace("Name: ", ""))
-            for line in file:
-                if line.endswith("eV"):
-                    line = line.replace(str(line[:line.index("_", -1)]), "")
-                    df_list.append(line.replace("eV", ""))
-    print(df_list)
+        file = file.read()
+        list_spectra = file.split("\n\n")
+        list_spectra = list_spectra[:-1]
+        seq_list = []
 
+        for idx, value in enumerate(list_spectra):
+            seq = value[value.find(" ")+1:value.find("/")]
+            ce_split = value.split("\n")[0]
+            ce_ev = ce_split.split("_")[-1]
+            ce = float(ce_ev[:ce_ev.find("eV")])
+            if len(seq) > max_seq_len or ce > max_ce or min_ce > ce:
+                list_spectra.pop(idx)
+            else:
+                seq_list.append(seq)
 
-    df = pd.DataFrame(df_list, columns=["sequence", "ce", "mz", "intensity"])
+        seqs = pd.DataFrame()
+        seqs["seq"] = seq_list
+        mz = []
+        for idx, value in enumerate(list_spectra):
+            row_spectra = value.split("\n")
+            for idx, value in row_spectra:
+                if value.startswith("N") or value.startswith("M") or value.startswith("C"):
+                    row_spectra.pop(idx)
+            # if value.startswith("N") or value.startswith("M") or value.startswith("C"):
+            #     row_spectra.pop(idx)
+                    mz_split = row_spectra.split("\t")
+                    for idx, value in enumerate(mz_split):
+                        mz_int = mz_split[idx]
+                        mz_val = mz_int[mz_int.rfind("\n")+1:]
+                        print("val", mz_val)
+                        mz.append(mz_val)
+        print("list", mz)
 
     df = None
-    seqs = None
-
     return df, seqs
+
 
 
 if __name__ == '__main__':
     msp_file = "./cptac2_mouse_hcd_selected.msp"
+    df, seq = msp_to_df(msp_file)
+    print(df, seq)
 
     # with open(msp_file) as file:
+    #     file = file.read()
+    #     list_spectra = file.split("\n\n")
+    #     list_spectra = list_spectra[:-1]
     #     df_list = []
-    #     for nameline in file:
-    #         if nameline.startswith("Name: "):
-    #             nameline = nameline.replace(str(nameline[nameline.index("/"):]), "")
-    #             df_list.append(nameline.replace("Name: ", ""))
-    #     for celine in file:
-    #         if celine.endswith("eV\n"):
-    #             celine = celine.replace(str(celine[:celine.rfind("_")+1]), "")
-    #             df_list.append(celine.replace("eV\n", ""))
-    # print(df_list)
-
-    with open(msp_file) as file:
-        file = file.read()
-        list_spectra = file.split("\n\n")
-        list_spectra = list_spectra[:-1]
-        df_list = []
-        max_seq_len = 30
-        min_seq_len = 1
-        min_ce = 36
-        max_ce = 40
-        for idx, value in enumerate(list_spectra):
-            # value = list_spectra[idx]
-            seq = value[value.find(" ")+1:value.find("/")]
-            if len(seq) > max_seq_len or len(seq) < min_seq_len:
-                list_spectra.pop(idx)
-            else:
-                df_list.append(seq)
-
-            ce_split = value.split("\n")[0]
-            ce_ev = ce_split.split("_")[-1]
-            ce = float(ce_ev[:ce_ev.find("eV")])
-            print(ce)
-            if not max_ce > ce > min_ce:
-                list_spectra.pop(idx)
-            else:
-                df_list.append(ce)
-
-    print(df_list, len(df_list))
+    #     max_seq_len = 30
+    #     min_seq_len = 1
+    #     min_ce = 36
+    #     max_ce = 40
+    #     for idx, value in enumerate(list_spectra):
+    #         # value = list_spectra[idx]
+    #         seq = value[value.find(" ")+1:value.find("/")]
+    #         ce_split = value.split("\n")[0]
+    #         ce_ev = ce_split.split("_")[-1]
+    #         ce = float(ce_ev[:ce_ev.find("eV")])
+    #         print(ce)
+    #         if len(seq) > max_seq_len or ce > max_ce or min_ce > ce:
+    #             list_spectra.pop(idx)
+    #         else:
+    #             df_list.append(seq)
+    #             df_list.append(ce)
+    #
+    #
+    # print(df_list, len(df_list))

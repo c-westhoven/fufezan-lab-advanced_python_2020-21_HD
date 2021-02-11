@@ -26,7 +26,7 @@ def msp_to_df(
         seqs (pd.DataFrame or np.array): sequences
     """
 
-    with open(msp_file) as file:
+    with open(input_file) as file:
 
         file = file.read()
         list_spectra = file.split("\n\n")
@@ -45,11 +45,12 @@ def msp_to_df(
 
         seqs = pd.DataFrame()
         seqs["seq"] = seq_list
+
         mz_int = []
         prefixes = ("M", "N", "C")
         for idx, value in enumerate(list_spectra):
             row_spectra = value.split("\n")
-            row_spectra = [x for x in row_spectra if not x.startswith(prefixes)]    # list with mz and ints [mzint, mzint, mzint, ...]
+            row_spectra = [x for x in row_spectra if not x.startswith(prefixes)]    # list with mz and ints [mzintblah, mzintblah, mzintblah, ...]
             for idx, value in enumerate(row_spectra):
                 mz_split = row_spectra[idx].split("\t")     # list [mz , int , blah]
                 mz_val = round(float(mz_split[0]))

@@ -230,7 +230,7 @@ if __name__ == "__main__":
     cdf.info()
 
     # datetime objects
-    cdf["date_rep"] = pd.to_datetime(cdf["date"])   # added column date_rep with datetime version of column date
+    cdf["date_rep"] = pd.to_datetime(cdf["date"], format="%d/%m/%Y", errors="raise")   # added column date_rep with datetime version of column date
 
     # add new column with time since start of recording
     cdf = delta_time(cdf, "date_rep", "delta_time")
@@ -274,6 +274,6 @@ if __name__ == "__main__":
     plot_europe = find_inc_rate_cont_plot(cdf_clean, continent="Europe")
 
     # line plot smoothed version average 3 months
-    plot_europe_smooth = inc_cont_plot_smooth(cdf_clean, continent="Europe")
+    plot_europe_smooth = inc_cont_plot_smooth(cdf_clean, continent="Europe")        # doesn't work
 
 

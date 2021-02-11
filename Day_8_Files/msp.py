@@ -48,8 +48,8 @@ def msp_to_df(
         mz = []
         for idx, value in enumerate(list_spectra):
             row_spectra = value.split("\n")
-            for idx, value in row_spectra:
-                if value.startswith("N") or value.startswith("M") or value.startswith("C"):
+            for idx, value in enumerate(row_spectra):
+                if value.startswith("N") and value.startswith("M") and value.startswith("C"):
                     row_spectra.pop(idx)
             # if value.startswith("N") or value.startswith("M") or value.startswith("C"):
             #     row_spectra.pop(idx)

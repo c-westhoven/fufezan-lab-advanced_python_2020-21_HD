@@ -4,7 +4,7 @@ import timeit
 
 
 def msp_to_df(
-    input_file,
+    input_file="./cptac2_mouse_hcd_selected.msp",
     max_seq_len=30,
     min_ce=36,
     max_ce=40,
@@ -68,29 +68,11 @@ def msp_to_df(
     return df, seqs
 
 
-def time():
-    SETUP_CODE = ''' 
-from __main__ import msp_to_df 
-import pandas as pd'''
-
-    TEST_CODE = ''' 
-msp_file = "./cptac2_mouse_hcd_selected.msp" 
-msp_to_df(msp_file) 
-    '''
-    # timeit.repeat statement
-    times = timeit.repeat(setup=SETUP_CODE,
-                          stmt=TEST_CODE,
-                          repeat=1,
-                          number=1)
-
-    # priniting minimum exec. time
-    print('time: {}'.format(min(times)))
-
 if __name__ == '__main__':
-    msp_file = "./cptac2_mouse_hcd_selected.msp"
-    df, seq = msp_to_df(msp_file)
-    print(df, seq)
+    # msp_file = "./cptac2_mouse_hcd_selected.msp"
+    # df, seq = msp_to_df(msp_file)
+    # print(df, seq)
 
-    time()
+print(timeit.timeit(msp_to_df, number=1))
 
 

@@ -4,9 +4,18 @@ import plotly.graph_objects as go
 
 
 class Protein:
-    def __init__(self, fasta, aa_csv, length, window_or_reg):
+    def __init__(self, fasta, aa_csv, property, length, window_or_reg):
+        """
+
+        :param fasta: fasta file in directory
+        :param aa_csv: amino acid property file in directory
+        :param lookup: hydropathy, or another amino acid property
+        :param length: length of sliding window
+        :param window_or_reg: sliding window "window" or now sliding window "reg"
+        """
         self.fasta = fasta
         self.aa_csv = aa_csv
+        self.property = property
         self.length = length
         self.window_or_reg = window_or_reg
         self.combined_seq = None
@@ -15,18 +24,7 @@ class Protein:
         self.hydropathy_list = None
         self.combined_seq = None
 
-
-        # method get data (pulls sequence from uniprot given id)
-        # method map --> accepts kwarp specify which lookup should be used to map the sequence against and return the value list
-        # method plot
-        # method sliding window
-
-    # # get data
-    # def get_data(self):
-    #     # use self.fasta to get fasta file from online
-    #     return  # fasta_file
-
-    def sequence_from_fasta(self):
+    def get_data(self):
         with open(self.fasta) as f:
             combined_seq = ""
             for line_dict in f:
@@ -35,17 +33,57 @@ class Protein:
         self.combined_seq = combined_seq
         return combined_seq
 
+    # def create_mapping_dict_hydropathy(self):
+    #     aa_df = pd.read_csv(self.aa_csv)
+    #     hydropathy_df = pd.DataFrame.drop(aa_df, columns=["Name", "3-letter code", "Molecular Weight",
+    #                                                       "Molecular Formula", "Residue Formula", "Residue Weight",
+    #                                                       "pka1",
+    #                                                       "pka2", "pkaX", "pI", "Accessible surface"], axis=1)
+    #     hydropathy_df = hydropathy_df.rename(
+    #         columns={"1-letter code": "aa", "hydropathy index (Kyte-Doolittle method)": "hydropathy"})
+    #     mapping_dict = dict(zip(hydropathy_df.aa, hydropathy_df.hydropathy))
+    #     return mapping_dict_hydropathy
+
     def create_mapping_dict(self):
+        # lookup = {
+        # "hydropathy": {"A" : "..."},
+        # "pI": {"A": "..."},
+
+
         aa_df = pd.read_csv(self.aa_csv)
-        hydropathy_df = pd.DataFrame.drop(aa_df, columns=["Name", "3-letter code", "Molecular Weight",
-                                                          "Molecular Formula", "Residue Formula", "Residue Weight",
-                                                          "pka1",
-                                                          "pka2", "pkaX", "pI", "Accessible surface"], axis=1)
-        hydropathy_df = hydropathy_df.rename(
+        aa_df = aa_df.rename(
             columns={"1-letter code": "aa", "hydropathy index (Kyte-Doolittle method)": "hydropathy"})
-        mapping_dict = dict(zip(hydropathy_df.aa, hydropathy_df.hydropathy))
-        self.mapping_dict = mapping_dict
-        return mapping_dict
+
+        aa_dict = {}
+        # add to dict with aa_dict["key"] = "value
+        for col in aa_df.columns:
+            aa_dict[col] = {}
+            for lettercode in aa_df.aa.values:
+                aa_dict[col][lettercode] = aa_df.col.iloc[aa_df.aa.index]
+
+        # mapping_dict = dict(zip(aa_df.aa, aa_df.hydropathy))
+        # self.mapping_dict = mapping_dict
+        return aa_dict
+
+    def create_mapping_dict(self):
+        # lookup = {
+        # "hydropathy": {"A" : "..."},
+        # "pI": {"A": "..."},
+
+        aa_df = pd.read_csv(self.aa_csv)
+        aa_df = aa_df.rename(
+            columns={"1-letter code": "aa", "hydropathy index (Kyte-Doolittle method)": "hydropathy"})
+
+        aa_dict = {}
+        # add to dict with aa_dict["key"] = "value
+        for aa_property in list(aa_df.columns):
+            aa_dict[aa_property] = {}
+            for idx, lettercode in enumerate(list(aa_df.aa.values)):
+                aa_dict[aa_property][lettercode] = aa_df.loc[idx, aa_property]
+
+        # mapping_dict = dict(zip(aa_df.aa, aa_df.hydropathy))
+        # self.mapping_dict = mapping_dict
+        return aa_dict
 
     def hydropathy_sequence_list(self, combined_seq, mapping_dict):
         """
@@ -124,6 +162,9 @@ class Protein:
         return
 
 
+
+
+
 if __name__ == '__main__':
     aa_df = pd.read_csv("../data/amino_acid_properties.csv")
     fasta = "../Day_3_Files/P32249.fasta"
@@ -132,10 +173,16 @@ if __name__ == '__main__':
     xaxis1 = "G Protein Sequence"
     yaxis1 = "Hydropathy"
 
-    protein = Protein(fasta, aa_csv, 10, "window")
-    seq = protein.sequence_from_fasta()
-    mapping_dict = protein.create_mapping_dict()
-    hydropathy_list = protein.hydropathy_sequence_list(seq, mapping_dict)
-    window_list = protein.sliding_window_hydropathy(seq, mapping_dict)
+    # protein = Protein(fasta, aa_csv, 10, "window")
+    # seq = protein.get_data()
+    # mapping_dict = protein.create_mapping_dict()
+    # hydropathy_list = protein.hydropathy_sequence_list(seq, mapping_dict)
+    # window_list = protein.sliding_window_hydropathy(seq, mapping_dict)
+    #
+    # barplot = protein.create_plot_bar()
 
-    barplot = protein.create_plot_bar()
+    # aa_df = aa_df.rename(
+    #     columns={"1-letter code": "aa", "hydropathy index (Kyte-Doolittle method)": "hydropathy"})
+    # print(aa_df.columns)
+    # print(aa_df.aa.values)
+    print(create_mapping_dict(aa_csv))

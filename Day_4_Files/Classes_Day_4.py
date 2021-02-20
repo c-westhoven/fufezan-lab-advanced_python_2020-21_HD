@@ -4,7 +4,7 @@ import plotly.graph_objects as go
 
 
 class Protein:
-    def __init__(self, fasta, aa_csv, property, length, window_or_reg):
+    def __init__(self, fasta, aa_csv, lookup, window_or_reg, length=None):
         """
 
         :param fasta: fasta file in directory
@@ -15,14 +15,16 @@ class Protein:
         """
         self.fasta = fasta
         self.aa_csv = aa_csv
-        self.property = property
+        self.lookup = lookup
         self.length = length
         self.window_or_reg = window_or_reg
+
         self.combined_seq = None
         self.mapping_dict = None
         self.averaged_hydropathy_list = None
         self.hydropathy_list = None
         self.combined_seq = None
+        self.sequence_aa_list = None
 
     def get_data(self):
         with open(self.fasta) as f:
@@ -33,38 +35,6 @@ class Protein:
         self.combined_seq = combined_seq
         return combined_seq
 
-    # def create_mapping_dict_hydropathy(self):
-    #     aa_df = pd.read_csv(self.aa_csv)
-    #     hydropathy_df = pd.DataFrame.drop(aa_df, columns=["Name", "3-letter code", "Molecular Weight",
-    #                                                       "Molecular Formula", "Residue Formula", "Residue Weight",
-    #                                                       "pka1",
-    #                                                       "pka2", "pkaX", "pI", "Accessible surface"], axis=1)
-    #     hydropathy_df = hydropathy_df.rename(
-    #         columns={"1-letter code": "aa", "hydropathy index (Kyte-Doolittle method)": "hydropathy"})
-    #     mapping_dict = dict(zip(hydropathy_df.aa, hydropathy_df.hydropathy))
-    #     return mapping_dict_hydropathy
-
-    def create_mapping_dict(self):
-        # lookup = {
-        # "hydropathy": {"A" : "..."},
-        # "pI": {"A": "..."},
-
-
-        aa_df = pd.read_csv(self.aa_csv)
-        aa_df = aa_df.rename(
-            columns={"1-letter code": "aa", "hydropathy index (Kyte-Doolittle method)": "hydropathy"})
-
-        aa_dict = {}
-        # add to dict with aa_dict["key"] = "value
-        for col in aa_df.columns:
-            aa_dict[col] = {}
-            for lettercode in aa_df.aa.values:
-                aa_dict[col][lettercode] = aa_df.col.iloc[aa_df.aa.index]
-
-        # mapping_dict = dict(zip(aa_df.aa, aa_df.hydropathy))
-        # self.mapping_dict = mapping_dict
-        return aa_dict
-
     def create_mapping_dict(self):
         # lookup = {
         # "hydropathy": {"A" : "..."},
@@ -74,16 +44,15 @@ class Protein:
         aa_df = aa_df.rename(
             columns={"1-letter code": "aa", "hydropathy index (Kyte-Doolittle method)": "hydropathy"})
 
-        aa_dict = {}
+        mapping_dict = {}
         # add to dict with aa_dict["key"] = "value
         for aa_property in list(aa_df.columns):
-            aa_dict[aa_property] = {}
+            mapping_dict[aa_property] = {}
             for idx, lettercode in enumerate(list(aa_df.aa.values)):
-                aa_dict[aa_property][lettercode] = aa_df.loc[idx, aa_property]
+                mapping_dict[aa_property][lettercode] = aa_df.loc[idx, aa_property]
 
-        # mapping_dict = dict(zip(aa_df.aa, aa_df.hydropathy))
-        # self.mapping_dict = mapping_dict
-        return aa_dict
+        self.mapping_dict = mapping_dict
+        return mapping_dict
 
     def hydropathy_sequence_list(self, combined_seq, mapping_dict):
         """
@@ -94,7 +63,7 @@ class Protein:
         """
         hydropathy_list = []
         for pos, aminoacid in enumerate(combined_seq):
-            hydropathy_list.append(mapping_dict.get(combined_seq[pos]))
+            hydropathy_list.append(mapping_dict[lookup].get(combined_seq[pos]))
         self.hydropathy_list = hydropathy_list
         return hydropathy_list
 
@@ -106,16 +75,19 @@ class Protein:
         :param length: length of window
         :return: list where each element represents the average of the window at a position
         """
-        sequence_as_hydropathy_window = deque([], maxlen=self.length)
-        averaged_hydropathy_list = []
-        for pos, aa in enumerate(combined_seq):
-            sequence_as_hydropathy_window.append(mapping_dict.get(combined_seq[pos]))
-            if pos > len(combined_seq) + self.length:
-                break
-            average = sum(sequence_as_hydropathy_window) / len(sequence_as_hydropathy_window)
-            averaged_hydropathy_list.append(average)
-        self.averaged_hydropathy_list = averaged_hydropathy_list
-        return averaged_hydropathy_list
+        if window_or_reg == "window":
+            sequence_as_hydropathy_window = deque([], maxlen=self.length)
+            averaged_hydropathy_list = []
+            for pos, aa in enumerate(combined_seq):
+                sequence_as_hydropathy_window.append(mapping_dict[lookup].get(combined_seq[pos]))
+                if pos > len(combined_seq) + self.length:
+                    break
+                average = sum(sequence_as_hydropathy_window) / len(sequence_as_hydropathy_window)
+                averaged_hydropathy_list.append(average)
+            self.averaged_hydropathy_list = averaged_hydropathy_list
+        else:
+            pass
+        return
 
     def create_plot_bar(self, title="", xaxis="", yaxis=""):
         """
@@ -129,13 +101,15 @@ class Protein:
         """
         if self.window_or_reg == "window":
             sequence_aa_list = []
+            self.sequence_aa_list = sequence_aa_list
             for x in range(len(self.averaged_hydropathy_list)):
                 sequence_aa_list.append(x)
             seq_hydropathy = self.averaged_hydropathy_list
 
         elif self.window_or_reg == "reg":
-            if isinstance(self.hydropathy_list, str) == True:
+            if isinstance(self.combined_seq, str) == True:
                 sequence_aa_list = []
+                self.sequence_aa_list = sequence_aa_list
                 seq_hydropathy = self.hydropathy_list
                 for pos, aminoacid in enumerate(self.combined_seq):
                     sequence_aa_list.append(aminoacid + str(pos))
@@ -143,6 +117,8 @@ class Protein:
             else:
                 sequence_aa_list = self.combined_seq
                 seq_hydropathy = self.hydropathy_list
+        else:
+            print("Something went wrong here")
 
         data = [
             go.Bar(
@@ -162,27 +138,21 @@ class Protein:
         return
 
 
-
-
-
 if __name__ == '__main__':
     aa_df = pd.read_csv("../data/amino_acid_properties.csv")
     fasta = "../Day_3_Files/P32249.fasta"
     aa_csv = "../data/amino_acid_properties.csv"
-    title1 = "Hydropathy Along G Protein Sequence",
+    lookup = "hydropathy"
+    title1 = "Hydropathy Along G Protein Sequence"
     xaxis1 = "G Protein Sequence"
     yaxis1 = "Hydropathy"
+    window_size = None
+    window_or_reg = "reg"
 
-    # protein = Protein(fasta, aa_csv, 10, "window")
-    # seq = protein.get_data()
-    # mapping_dict = protein.create_mapping_dict()
-    # hydropathy_list = protein.hydropathy_sequence_list(seq, mapping_dict)
-    # window_list = protein.sliding_window_hydropathy(seq, mapping_dict)
-    #
-    # barplot = protein.create_plot_bar()
+    protein = Protein(fasta, aa_csv, lookup, window_or_reg, window_size)
+    seq = protein.get_data()
+    mapping_dict = protein.create_mapping_dict()
+    hydropathy_list = protein.hydropathy_sequence_list(seq, mapping_dict)
+    window_list = protein.sliding_window_hydropathy(seq, mapping_dict)
 
-    # aa_df = aa_df.rename(
-    #     columns={"1-letter code": "aa", "hydropathy index (Kyte-Doolittle method)": "hydropathy"})
-    # print(aa_df.columns)
-    # print(aa_df.aa.values)
-    print(create_mapping_dict(aa_csv))
+    barplot = protein.create_plot_bar(title1, xaxis1, yaxis1)

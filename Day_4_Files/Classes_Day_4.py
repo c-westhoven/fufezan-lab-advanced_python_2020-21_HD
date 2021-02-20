@@ -22,11 +22,15 @@ class Protein:
         self.combined_seq = None
         self.mapping_dict = None
         self.averaged_hydropathy_list = None
-        self.hydropathy_list = None
+        self.lookup_list = None
         self.combined_seq = None
         self.sequence_aa_list = None
 
     def get_data(self):
+        """
+        gets data from fasta file and puts sequence together
+        :return: combined_seq, str of the sequence from file
+        """
         with open(self.fasta) as f:
             combined_seq = ""
             for line_dict in f:
@@ -36,6 +40,10 @@ class Protein:
         return combined_seq
 
     def create_mapping_dict(self):
+        """
+        creates a mapping dict for lookup/property of choice when initializing class
+        :return:
+        """
         # lookup = {
         # "hydropathy": {"A" : "..."},
         # "pI": {"A": "..."},
@@ -56,23 +64,22 @@ class Protein:
 
     def hydropathy_sequence_list(self, combined_seq, mapping_dict):
         """
-        creates a list with hydropathy values corresponding to the sequence
-        :param sequence: single sequence, str
+        creates a list with property values corresponding to the sequence
+        :param combined_seq: single sequence, str
         :param mapping_dict: mapping_dict with aminoacid: hydropathy
-        :return:
+        :return: lookup list of property values to sequence
         """
-        hydropathy_list = []
+        lookup_list = []
         for pos, aminoacid in enumerate(combined_seq):
-            hydropathy_list.append(mapping_dict[lookup].get(combined_seq[pos]))
-        self.hydropathy_list = hydropathy_list
-        return hydropathy_list
+            lookup_list.append(mapping_dict[lookup].get(combined_seq[pos]))
+        self.lookup_list = lookup_list
+        return lookup_list
 
     def sliding_window_hydropathy(self, combined_seq, mapping_dict):
         """
         creates a sliding window along sequence, and calculates the average at each position
-        :param sequence: aminoacid sequence, str
+        :param combined_seq: aminoacid sequence, str
         :param mapping_dict: mapping dict
-        :param length: length of window
         :return: list where each element represents the average of the window at a position
         """
         if window_or_reg == "window":
@@ -92,8 +99,6 @@ class Protein:
     def create_plot_bar(self, title="", xaxis="", yaxis=""):
         """
         plots the sequence (x) against the corresponding values (ex. hydropathy) (y)
-        :param seq_hydropathy: list with hydropathy values corresponding to amino acid sequence
-        :param seq_aa: generally a string
         :param title: title of plot
         :param xaxis: xaxis label
         :param yaxis: yaxis label
@@ -110,13 +115,13 @@ class Protein:
             if isinstance(self.combined_seq, str) == True:
                 sequence_aa_list = []
                 self.sequence_aa_list = sequence_aa_list
-                seq_hydropathy = self.hydropathy_list
+                seq_hydropathy = self.lookup_list
                 for pos, aminoacid in enumerate(self.combined_seq):
                     sequence_aa_list.append(aminoacid + str(pos))
 
             else:
                 sequence_aa_list = self.combined_seq
-                seq_hydropathy = self.hydropathy_list
+                seq_hydropathy = self.lookup_list
         else:
             print("Something went wrong here")
 

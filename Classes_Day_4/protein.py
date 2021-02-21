@@ -4,7 +4,7 @@ import plotly.graph_objects as go
 
 
 class Protein:
-    def __init__(self, fasta, aa_csv, lookup, window_or_reg, length=None):
+    def __init__(self, fasta, aa_csv, lookup):
         """
 
         :param fasta: fasta file in directory
@@ -16,8 +16,7 @@ class Protein:
         self.fasta = fasta
         self.aa_csv = aa_csv
         self.lookup = lookup
-        self.length = length
-        self.window_or_reg = window_or_reg
+        self.length = None
 
         self.combined_seq = None
         self.mapping_dict = None
@@ -75,28 +74,28 @@ class Protein:
         self.lookup_list = lookup_list
         return lookup_list
 
-    def sliding_window_hydropathy(self, combined_seq, mapping_dict):
+    def sliding_window(self, combined_seq, mapping_dict, length):
         """
         creates a sliding window along sequence, and calculates the average at each position
         :param combined_seq: aminoacid sequence, str
         :param mapping_dict: mapping dict
         :return: list where each element represents the average of the window at a position
         """
-        if window_or_reg == "window":
-            sequence_as_hydropathy_window = deque([], maxlen=self.length)
-            averaged_hydropathy_list = []
-            for pos, aa in enumerate(combined_seq):
-                sequence_as_hydropathy_window.append(mapping_dict[lookup].get(combined_seq[pos]))
-                if pos > len(combined_seq) + self.length:
-                    break
-                average = sum(sequence_as_hydropathy_window) / len(sequence_as_hydropathy_window)
-                averaged_hydropathy_list.append(average)
-            self.averaged_hydropathy_list = averaged_hydropathy_list
-        else:
-            pass
-        return
 
-    def create_plot_bar(self, title="", xaxis="", yaxis=""):
+        sequence_as_hydropathy_window = deque([], maxlen=length)
+        self.length = length
+        averaged_hydropathy_list = []
+        for pos, aa in enumerate(combined_seq):
+            sequence_as_hydropathy_window.append(mapping_dict[lookup].get(combined_seq[pos]))
+            if pos > len(combined_seq) + self.length:
+                break
+            average = sum(sequence_as_hydropathy_window) / len(sequence_as_hydropathy_window)
+            averaged_hydropathy_list.append(average)
+        self.averaged_hydropathy_list = averaged_hydropathy_list
+
+        return averaged_hydropathy_list
+
+    def create_plot_bar(self, title="", xaxis="", yaxis="", window_or_reg=""):
         """
         plots the sequence (x) against the corresponding values (ex. hydropathy) (y)
         :param title: title of plot
@@ -104,14 +103,14 @@ class Protein:
         :param yaxis: yaxis label
         :return:
         """
-        if self.window_or_reg == "window":
+        if window_or_reg == "window":
             sequence_aa_list = []
             self.sequence_aa_list = sequence_aa_list
             for x in range(len(self.averaged_hydropathy_list)):
                 sequence_aa_list.append(x)
             seq_hydropathy = self.averaged_hydropathy_list
 
-        elif self.window_or_reg == "reg":
+        elif window_or_reg == "reg":
             if isinstance(self.combined_seq, str) == True:
                 sequence_aa_list = []
                 self.sequence_aa_list = sequence_aa_list
@@ -151,13 +150,13 @@ if __name__ == '__main__':
     title1 = "Hydropathy Along G Protein Sequence"
     xaxis1 = "G Protein Sequence"
     yaxis1 = "Hydropathy"
-    window_size = None
+    window_size = 10
     window_or_reg = "reg"
 
-    protein = Protein(fasta, aa_csv, lookup, window_or_reg, window_size)
+    protein = Protein(fasta, aa_csv, lookup)
     seq = protein.get_data()
     mapping_dict = protein.create_mapping_dict()
     hydropathy_list = protein.hydropathy_sequence_list(seq, mapping_dict)
-    window_list = protein.sliding_window_hydropathy(seq, mapping_dict)
+    window_list = protein.sliding_window(seq, mapping_dict, window_size)
 
-    barplot = protein.create_plot_bar(title1, xaxis1, yaxis1)
+    barplot = protein.create_plot_bar(title1, xaxis1, yaxis1, window_or_reg)

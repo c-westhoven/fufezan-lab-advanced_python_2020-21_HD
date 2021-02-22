@@ -73,8 +73,6 @@ def test_create_plot_bar():
     sequence_aa_list = testprotein.get_data()
     seq_hydropathy = testprotein.hydropathy_sequence_list(sequence_aa_list, mapping_dict)
 
-    fig = testprotein.create_plot_bar(title1, xaxis1, yaxis1, window_or_reg=window_or_reg)
-
     data_sol = [
         go.Bar(
             x=sequence_aa_list,
@@ -89,5 +87,5 @@ def test_create_plot_bar():
                       yaxis=dict(
                           title=yaxis1
                       ))
-    fig_sol.show()
+    fig = testprotein.create_plot_bar(title1, xaxis1, yaxis1, window_or_reg=window_or_reg)
     assert fig == fig_sol

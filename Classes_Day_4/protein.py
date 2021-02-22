@@ -56,7 +56,7 @@ class Protein:
         for aa_property in list(aa_df.columns):
             mapping_dict[aa_property] = {}
             for idx, lettercode in enumerate(list(aa_df.aa.values)):
-                mapping_dict[aa_property][lettercode] = aa_df.loc[idx, aa_property]
+                    mapping_dict[aa_property][lettercode] = aa_df.loc[idx, aa_property]
 
         self.mapping_dict = mapping_dict
         return mapping_dict
@@ -70,7 +70,7 @@ class Protein:
         """
         lookup_list = []
         for pos, aminoacid in enumerate(combined_seq):
-            lookup_list.append(mapping_dict[lookup].get(combined_seq[pos]))
+            lookup_list.append(mapping_dict[self.lookup].get(combined_seq[pos]))
         self.lookup_list = lookup_list
         return lookup_list
 
@@ -86,7 +86,7 @@ class Protein:
         self.length = length
         averaged_hydropathy_list = []
         for pos, aa in enumerate(combined_seq):
-            sequence_as_hydropathy_window.append(mapping_dict[lookup].get(combined_seq[pos]))
+            sequence_as_hydropathy_window.append(mapping_dict[self.lookup].get(combined_seq[pos]))
             if pos > len(combined_seq) + self.length:
                 break
             average = sum(sequence_as_hydropathy_window) / len(sequence_as_hydropathy_window)

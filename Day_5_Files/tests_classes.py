@@ -1,8 +1,10 @@
+import sys, os
+
 from Classes_Day_4.protein import Protein
-import pandas as pd
+
 import plotly.graph_objects as go
 import pytest
-import sys, os
+
 
 
 def test_get_data():

@@ -164,19 +164,23 @@ def find_inc_rate_cont_plot(df, continent="Europe"):
 
 
 def inc_cont_plot_smooth(df, continent="Europe"):
-    cont_group = df.groupby("continent").get_group(continent)
+    smoothed_cont_group = df.groupby("continent").get_group(continent).copy()
+    smoothed_cont_group_14d = smoothed_cont_group["14d_incidence"].rolling(window=13, center = True).mean()
+    smoothed_cont_group["smoothed_14d_inc"]= smoothed_cont_group_14d
+    smoothed_cont_group = smoothed_cont_group.groupby(["countries_terr"])
+
     fig = go.Figure()
-    country_window = deque([], 20)
-    date_window = deque([])
-    incid_threemonths = []
-    for country, country_group in cont_group.groupby("countries_terr"):
-        for pos, date in enumerate(country_group["date_rep"]):
-            country_window.append(country_group.set_index("delta_time").sort_index()["14d_incidence"])
-            date_window = date_window.append(country_group.set_index("delta_time").sort_index()["date_rep"])        # Series
-            incid_threemonths.append(mean(country_window))
-            fig.add_trace(go.Scatter(x=dates, y=incid_threemonths,
-                                 mode='lines',
-                                 name= country))
+
+    for country, country_group in smoothed_cont_group["countries_terr"].unique():
+        smoothed_country = smoothed_cont_group.get_group(country[0]).sort_values("delta_time")
+
+        # country_window.append(country_group.set_index("delta_time").sort_index()["14d_incidence"])
+        # date_window = date_window.append(country_group.set_index("delta_time").sort_index()["date_rep"])        # Series
+        # incid_threemonths.append(mean(country_window))
+
+        fig.add_trace(go.Scatter(x=smoothed_country["date"], y=smoothed_country["smoothed_14d_inc"],
+                             mode='lines',
+                             name= country))
 
     fig.update_layout(title="14d incidences in" + str(continent))
     fig.layout.xaxis.title = "Time"
@@ -220,7 +224,7 @@ if __name__ == "__main__":
     newname = "date"
     cdf = cdf.rename(columns={"dateRep": "date", "countriesAndTerritories":"countries_terr", "geoId": "geo_id",
                               "countryterritoryCode":"geo_code", "popData2019":"pop_data_2019",
-                              "continentExp":"continent", "notification_rate_per_100000_population_14-days":"14d_incidence"})
+                              "continentExp":"continent", "Cumulative_number_for_14_days_of_COVID-19_cases_per_100000":"14d_incidence"})        # they renamed the 14d incidence to cumulative number not notification rate
 
     cdf.info()
     # 14d_incidence is Dtype object and not a float

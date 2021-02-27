@@ -171,8 +171,8 @@ def inc_cont_plot_smooth(df, continent="Europe"):
 
     fig = go.Figure()
 
-    for country, country_group in smoothed_cont_group["countries_terr"].unique():
-        smoothed_country = smoothed_cont_group.get_group(country[0]).sort_values("delta_time")
+    for pos, country in enumerate(list(smoothed_cont_group["countries_terr"].unique())):
+        smoothed_country = smoothed_cont_group.get_group(country).sort_values("delta_time")
 
         # country_window.append(country_group.set_index("delta_time").sort_index()["14d_incidence"])
         # date_window = date_window.append(country_group.set_index("delta_time").sort_index()["date_rep"])        # Series
@@ -188,8 +188,39 @@ def inc_cont_plot_smooth(df, continent="Europe"):
     fig.show()
     return
 
-def create_radial_plot(df):
 
+def create_radial_plot(df, list_of_countries):
+    fig = go.Figure()
+
+    for country in list_of_countries:
+        r_values = []
+        theta_values = []
+        current_country = df.groupby("countries_terr").get_group(country)
+
+        # only keep rows for measurements within first year since start of measurement:
+        current_country_firstyear = current_country[current_country["delta_time"] < 365]        ## different format?
+
+        for row in range(current_country_firstyear.shape[0]):
+            r_values.append(current_country_firstyear.iloc[row, 12])  # death_per population
+            theta_values.append(current_country_firstyear.iloc[row, 13] * 360)  # percent*grad
+
+        fig.add_trace(go.Scatterpolargl(r=r_values,
+                                        theta=theta_values,
+                                        name=country,
+                                        mode='markers'))
+
+    fig.update_layout(title={"text": "death rate per 100,000 people in first year measuring",
+                      "font": {"size": 20}}
+                      )
+    fig.update_layout(title_xref='paper')  # titel ned so weit links
+    # fig.update_layout(legend_x=0.8)  # legende weiter links
+    fig.update_polars(radialaxis_title_text="death rate")
+    fig.update_polars(angularaxis_tickmode='array')
+    # fig.update_polars(angularaxis_tickvals=[0, 41.425, 82.849, 124.274, 165.699, 207.123, 248.550, 289.973, 331.397])  # an den Stellen gibts ticks
+    # fig.update_polars(angularaxis_ticktext=["0 weeks since start of measurements", 6, 12, 18, 24, 30, 36, 42, 48])  # Beschriftung für die ticks
+
+    fig.show()
+    return
 
 
 
@@ -203,6 +234,7 @@ if __name__ == "__main__":
     cdf = cdf.rename(columns={"dateRep": "date", "countriesAndTerritories":"countries_terr", "geoId": "geo_id",
                               "countryterritoryCode":"geo_code", "popData2019":"pop_data_2019",
                               "continentExp":"continent", "Cumulative_number_for_14_days_of_COVID-19_cases_per_100000":"14d_incidence"})        # they renamed the 14d incidence to cumulative number not notification rate
+    # also possibly renamed cases_weekly and deaths_weekly
 
     cdf.info()
     # 14d_incidence is Dtype object and not a float
@@ -230,8 +262,8 @@ if __name__ == "__main__":
     # create_hist(cdf, "14d_incidence", "14d")
 
     # clean (delete negative values and their rows)
-    cdf_clean = delete_neg_rows(cdf, "cases_weekly")
-    cdf_clean = delete_neg_rows(cdf_clean, "deaths_weekly")
+    cdf_clean = delete_neg_rows(cdf, "cases")
+    cdf_clean = delete_neg_rows(cdf_clean, "deaths")
     cdf_clean = delete_neg_rows(cdf_clean, "14d_incidence")
     cdf_clean = delete_neg_rows(cdf_clean, "pop_data_2019")
     cdf_clean = delete_neg_rows(cdf_clean, "date_rep")
@@ -246,7 +278,7 @@ if __name__ == "__main__":
     grp = cdf_clean[["continent", "countries_terr", "14d_incidence", "date_rep"]].groupby("continent")
     # grp.head()
 
-    # idea how o define most drastic increase and decrease
+    # most drastic increase and decrease:
     # by continent per year
     incidence_df_cont = find_inc_rate_cont(cdf_clean)
     # by world per year
@@ -257,5 +289,9 @@ if __name__ == "__main__":
 
     # line plot smoothed version average 3 months
     plot_europe_smooth = inc_cont_plot_smooth(cdf_clean, continent="Europe")        # doesn't work
+
+    # radial plot
+    list_of_countries = ["Greece", "Italy", "Sweden", "Germany"]
+    create_radial_plot(cdf_clean, list_of_countries)
 
 

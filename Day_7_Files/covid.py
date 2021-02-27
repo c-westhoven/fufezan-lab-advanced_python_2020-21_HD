@@ -188,30 +188,8 @@ def inc_cont_plot_smooth(df, continent="Europe"):
     fig.show()
     return
 
-# sequence_as_hydropathy_window = deque([], maxlen=length)
-#     averaged_hydropathy_list = []
-#     for pos, aa in enumerate(sequence):
-#         sequence_as_hydropathy_window.append(mapping_dict.get(sequence[pos]))
-#         if pos > len(sequence) + length:
-#             break
-#         average = sum(sequence_as_hydropathy_window) / len(sequence_as_hydropathy_window)
-#         averaged_hydropathy_list.append(average)
-#     return averaged_hydropathy_list
+def create_radial_plot(df):
 
-
-# a_pandas["min_difs"] = pd.to_numeric(a_pandas["min_difs"])
-# a_pandas["max_difs"] = pd.to_numeric(a_pandas["max_difs"])
-#     incidence = cont_grp.agg({"max_diff": "max", "min"})
-#     country = fdf.country[fdf[fdf["max_diff"] == max(incidence)].index]
-#     data2.append([continent, country, incidence])
-#
-#
-# fdf2 = pd.DataFrame(data2, columns=["continent", "country", "incidence"])
-
-
-    # test = cdf_clean[["continent", "countries_terr", "14d_incidence"]].groupby(["countries_terr"]).get_group(("China"))
-    # maxim = max(test["14d_incidence"])
-    # test.get_group(("China"))
 
 
 

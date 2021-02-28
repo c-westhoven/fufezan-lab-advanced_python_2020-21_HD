@@ -193,32 +193,30 @@ def create_radial_plot(df, list_of_countries):
     fig = go.Figure()
 
     for country in list_of_countries:
-        r_values = []
-        theta_values = []
+        r_values = []           # distance from center
+        theta_values = []       # angle around radial chart
         current_country = df.groupby("countries_terr").get_group(country)
 
         # only keep rows for measurements within first year since start of measurement:
-        current_country_firstyear = current_country[current_country["delta_time"] < 365]        ## different format?
+        current_country_firstyear = current_country[current_country["delta_time"] < timedelta(days = 365)]        ## different format?
 
         for row in range(current_country_firstyear.shape[0]):
-            r_values.append(current_country_firstyear.iloc[row, 12])  # death_per population
-            theta_values.append(current_country_firstyear.iloc[row, 13] * 360)  # percent*grad
+            r_values.append((float(current_country_firstyear.iloc[row, 5])/float(current_country_firstyear.iloc[row, 9]))*100000)  # death_per population
+            theta_values.append(current_country_firstyear.iloc[row, 13].days * 360/365)  # percent (delta_time) * 360 grad
 
         fig.add_trace(go.Scatterpolargl(r=r_values,
                                         theta=theta_values,
                                         name=country,
-                                        mode='markers'))
+                                        mode='lines'))
 
-    fig.update_layout(title={"text": "death rate per 100,000 people in first year measuring",
+    fig.update_layout(title={"text": "Death Rate per 100,000 in First Year Since Recording",
                       "font": {"size": 20}}
                       )
-    fig.update_layout(title_xref='paper')  # titel ned so weit links
-    # fig.update_layout(legend_x=0.8)  # legende weiter links
+    fig.update_layout(title_xref='paper')
     fig.update_polars(radialaxis_title_text="death rate")
     fig.update_polars(angularaxis_tickmode='array')
-    # fig.update_polars(angularaxis_tickvals=[0, 41.425, 82.849, 124.274, 165.699, 207.123, 248.550, 289.973, 331.397])  # an den Stellen gibts ticks
-    # fig.update_polars(angularaxis_ticktext=["0 weeks since start of measurements", 6, 12, 18, 24, 30, 36, 42, 48])  # Beschriftung für die ticks
-
+    fig.update_polars(angularaxis_tickvals=[0, 41.425, 82.849, 124.274, 165.699, 207.123, 248.550, 289.973, 331.397])  # Where Ticks
+    fig.update_polars(angularaxis_ticktext=[0, 42, 84, 126, 168, 210, 252, 294, 334])  # Tick Text
     fig.show()
     return
 
@@ -288,7 +286,7 @@ if __name__ == "__main__":
     plot_europe = find_inc_rate_cont_plot(cdf_clean, continent="Europe")
 
     # line plot smoothed version average 3 months
-    plot_europe_smooth = inc_cont_plot_smooth(cdf_clean, continent="Europe")        # doesn't work
+    # plot_europe_smooth = inc_cont_plot_smooth(cdf_clean, continent="Europe")        # doesn't work
 
     # radial plot
     list_of_countries = ["Greece", "Italy", "Sweden", "Germany"]

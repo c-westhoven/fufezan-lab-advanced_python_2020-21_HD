@@ -142,7 +142,7 @@ class Protein:
                           yaxis=dict(
                               title=yaxis
                           ))
-        # fig.show()
+        fig.show()
         return fig
 
 
@@ -155,7 +155,7 @@ if __name__ == '__main__':
     xaxis1 = "G Protein Sequence"
     yaxis1 = "Hydropathy"
     window_size = 10
-    window_or_reg = "reg"
+    window_or_reg = "window"
 
     protein = Protein(fasta, aa_csv, lookup)
     seq = protein.get_data()

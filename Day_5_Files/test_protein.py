@@ -94,4 +94,4 @@ def test_create_plot_bar():
     fig_test = testprotein.create_plot_bar(title1, xaxis1, yaxis1, window_or_reg=window_or_reg)
     assert fig_test == fig_sol
 
-# !pytest --cov-report html --cov=Classes_Day_4 Day_5_Files/
+# pytest --cov-report html --cov=Classes_Day_4 Day_5_Files/

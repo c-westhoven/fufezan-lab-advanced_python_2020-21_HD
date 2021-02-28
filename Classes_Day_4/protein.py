@@ -50,12 +50,16 @@ class Protein:
         aa_df = pd.read_csv(self.aa_csv)
         aa_df = aa_df.rename(
             columns={"1-letter code": "aa", "hydropathy index (Kyte-Doolittle method)": "hydropathy"})
+        aa_df = aa_df.drop(["pkaX"], axis=1)
 
         mapping_dict = {}
         # add to dict with aa_dict["key"] = "value
         for aa_property in list(aa_df.columns):
             mapping_dict[aa_property] = {}
             for idx, lettercode in enumerate(list(aa_df.aa.values)):
+                if aa_df.loc[idx, aa_property] == None:
+                    pass
+                else:
                     mapping_dict[aa_property][lettercode] = aa_df.loc[idx, aa_property]
 
         self.mapping_dict = mapping_dict
@@ -138,8 +142,8 @@ class Protein:
                           yaxis=dict(
                               title=yaxis
                           ))
-        fig.show()
-        return
+        # fig.show()
+        return fig
 
 
 if __name__ == '__main__':

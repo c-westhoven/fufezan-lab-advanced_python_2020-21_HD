@@ -10,6 +10,7 @@ Welcome to CoffeePy's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   core
 
 
 Indices and tables

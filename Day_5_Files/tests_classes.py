@@ -1,6 +1,6 @@
 import sys, os
 
-from Classes_Day_4.protein import Protein
+from classes_day_4.protein import Protein
 
 import plotly.graph_objects as go
 import pytest
@@ -78,4 +78,4 @@ def test_create_plot_bar():
     ]
     assert fig == go.Figure(data=data_sol)
 
-# !pytest --cov-report html --cov=Classes_Day_4 Day_5_Files/
+# !pytest --cov-report html --cov=classes_day_4 Day_5_Files/
